@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "context-handler"
+version = "0.1.0"
+description = ""
+authors = ["Gustavo Correa <self.gustavocorrea@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+black = "^21.9b0"
+pytest = "^6.2.5"
+pytest-cov = "^3.0.0"
+pytest-asyncio = "^0.16.0"
+autoflake = "^1.4"
+isort = "^5.9.3"
+pylint = "^2.11.1"
+bandit = "^1.7.0"
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.0.1"
+tag_format = "$version"
+version_files = [
+    "pyproject.toml:version",
+    "context_handler.__init__.py"
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
