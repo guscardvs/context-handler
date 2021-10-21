@@ -1,4 +1,4 @@
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 __version_info__ = tuple(
     map(lambda val: int(val) if val.isnumeric() else val, __version__.split("."))
 )
