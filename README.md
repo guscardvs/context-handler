@@ -34,7 +34,7 @@ class ConnectionProvider:
 
 @ensure_context.function # Utility to open context automatically before calling function
 def make_some_query(context: SyncContext[Connection]):
-    with context.begin() as client:  # client here is the same instance from the last .begin() call
+    with context.begin() as client:
         client.execute(sql_stmt)
 
 context = SyncContext[Connection](ConnectionProvider())
