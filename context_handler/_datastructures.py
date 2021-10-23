@@ -3,6 +3,7 @@ import typing
 T = typing.TypeVar("T")
 
 
+@typing.runtime_checkable
 class Provider(typing.Protocol[T]):
     """Client Adapter Interface Accepted by SyncContext"""
 
@@ -18,6 +19,7 @@ class Provider(typing.Protocol[T]):
         """Acquires a client `T` and releases at the end"""
 
 
+@typing.runtime_checkable
 class AsyncProvider(typing.Protocol[T]):
     """Client Adapter Interface Accepted by AsyncContext"""
 
@@ -33,6 +35,7 @@ class AsyncProvider(typing.Protocol[T]):
         """Acquires a client `T` and releases at the end"""
 
 
+@typing.runtime_checkable
 class AbstractSyncContext(typing.Protocol[T]):
     provider: Provider[T]
     inside_ctx: bool
@@ -54,6 +57,7 @@ class AbstractSyncContext(typing.Protocol[T]):
         """Returns client from open context or a independent client if no context is open."""
 
 
+@typing.runtime_checkable
 class AbstractAsyncContext(typing.Protocol[T]):
     provider: AsyncProvider[T]
     inside_ctx: bool

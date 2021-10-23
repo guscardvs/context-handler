@@ -19,10 +19,17 @@ class _ContextFactory(typing.Generic[T]):
     ) -> None:
         self._provider_class = provider_class
         self._context_class = context_class
-        self._state_name = context_state_name or self.generate_state_name()
+        self._state_name = context_state_name or self.generate_state_name(
+            self._provider_class
+        )
 
-    def generate_state_name(self):
-        return self._provider_class.state_name.lower().replace("provider", "context")
+    @staticmethod
+    def generate_state_name(
+        provider_class: typing.Union[
+            type[_datastructures.AsyncProvider[T]], type[_datastructures.Provider[T]]
+        ]
+    ):
+        return provider_class.state_name.lower().replace("provider", "context")
 
     def has_active_context(self, has_state: _datastructures.HasState):
         return bool(self._get_active_context(_datastructures.StateWrapper(has_state)))
