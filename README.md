@@ -46,7 +46,7 @@ with context.open():
 # outside .open(), sqlalchemy.Connection is no longer available
 ```
 
-- Exeample with aiohttp.ClientSession
+- Example with aiohttp.ClientSession
 
 ```python
 from context_handler import AsyncContext, ensure_context
