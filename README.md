@@ -1,6 +1,6 @@
 # Context Handler
 
-Context handler to ensure complete lifecycle to a client
+Context handler to ensure a single client instance inside a context.
 
 ## Usage
 
