@@ -15,7 +15,7 @@ class SyncContext(typing.Generic[T]):
     def in_context(self):
         if self._client is None:
             return False
-        return not self._provider.is_closed(self._client)
+        return not self.get_provider().is_closed(self._client)
 
     @property
     def client(self) -> T:
@@ -29,21 +29,33 @@ class SyncContext(typing.Generic[T]):
     def _reset_context(self):
         if self._client is None:
             return
-        if not self._provider.is_closed(self._client):
-            self._provider.close_client(self._client)
-        self._client = None
+        if not self.get_provider().is_closed(self._client):
+            self.get_provider().close_client(self._client)
+        self._set_client(None)
         self._inside_ctx = False
 
     def _open_context(self):
-        with self._provider.acquire() as client:
-            self._client = client
+        error = None
+        with self.get_provider().acquire() as client:
+            self._set_client(client)
             self._inside_ctx = True
-            yield
+            try:
+                yield
+            except Exception as err:
+                error = err
         self._reset_context()
+        if error is not None:
+            raise error
 
     def _begin_context(self):
-        with self._provider.acquire() as client:
-            yield client
+        error = None
+        with self.get_provider().acquire() as client:
+            try:
+                yield client
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
 
     def _contexted_begin(self):
         yield self._client
@@ -63,6 +75,16 @@ class SyncContext(typing.Generic[T]):
             return self._contexted_open()
         return self._open_context()
 
+    def __getattribute__(self, name: str) -> typing.Any:
+        if name == "_provider":
+            name = "invalid"
+        return super().__getattribute__(name)
+
+    def get_provider(self) -> _datastructures.ImmutableSyncProvider[T]:
+        return _datastructures.ImmutableSyncProvider(
+            super().__getattribute__("_provider")
+        )
+
 
 class AsyncContext(typing.Generic[T]):
     def __init__(self, provider: _datastructures.AsyncProvider[T]) -> None:
@@ -73,7 +95,7 @@ class AsyncContext(typing.Generic[T]):
     def in_context(self):
         if self._client is None:
             return False
-        return not self._provider.is_closed(self._client)
+        return not self.get_provider().is_closed(self._client)
 
     @property
     def client(self) -> T:
@@ -87,21 +109,33 @@ class AsyncContext(typing.Generic[T]):
     async def _reset_context(self):
         if self._client is None:
             return
-        if not self._provider.is_closed(self._client):
-            await self._provider.close_client(self._client)
-        self._client = None
+        if not self.get_provider().is_closed(self._client):
+            await self.get_provider().close_client(self._client)
+        self._set_client(None)
         self._inside_ctx = False
 
     async def _open_context(self):
-        async with self._provider.acquire() as client:
-            self._client = client
+        error = None
+        async with self.get_provider().acquire() as client:
+            self._set_client(client)
             self._inside_ctx = True
-            yield
+            try:
+                yield
+            except Exception as err:
+                error = err
         await self._reset_context()
+        if error is not None:
+            raise error
 
     async def _begin_context(self):
-        async with self._provider.acquire() as client:
-            yield client
+        error = None
+        async with self.get_provider().acquire() as client:
+            try:
+                yield client
+            except Exception as err:
+                error = err
+        if error is not None:
+            raise error
 
     async def _contexted_begin(self):
         yield self._client
@@ -120,3 +154,13 @@ class AsyncContext(typing.Generic[T]):
         if self.in_context():
             return self._contexted_open()
         return self._open_context()
+
+    def __getattribute__(self, name: str) -> typing.Any:
+        if name == "_provider":
+            name = "invalid"
+        return super().__getattribute__(name)
+
+    def get_provider(self) -> _datastructures.ImmutableAsyncProvider[T]:
+        return _datastructures.ImmutableAsyncProvider(
+            super().__getattribute__("_provider")
+        )

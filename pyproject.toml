@@ -24,6 +24,12 @@ bandit = "^1.7.0"
 fastapi = ["fastapi"]
 sanic = ["sanic"]
 
+[tool.black]
+line_length = 79
+
+[tool.isort]
+profile = "black"
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 version = "0.2.0"

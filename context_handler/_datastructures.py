@@ -1,3 +1,4 @@
+import enum
 import typing
 
 T = typing.TypeVar("T")
@@ -35,10 +36,70 @@ class AsyncProvider(typing.Protocol[T]):
         """Acquires a client `T` and releases at the end"""
 
 
+class ImmutableSyncProvider(typing.Generic[T]):
+    """Wrapper class to prevent mutating provider"""
+
+    state_name = "immutable_sync_provider"
+
+    def __init__(self, provider: Provider[T]) -> None:
+        self._provider = provider
+
+    def __getattribute__(self, name: str) -> typing.Any:
+        allowed = ["get_state_name", "is_closed", "close_client", "acquire"]
+        if name in allowed:
+            return super().__getattribute__(name)
+        message = "'{}' object has no attribute '{}'"
+        raise AttributeError(
+            message.format(ImmutableSyncProvider.__name__, name)
+        )
+
+    def get_state_name(self):
+        return super().__getattribute__("_provider").state_name
+
+    def is_closed(self, client: T) -> bool:
+        return super().__getattribute__("_provider").is_closed(client)
+
+    def close_client(self, client: T) -> None:
+        return super().__getattribute__("_provider").close_client(client)
+
+    def acquire(self) -> typing.ContextManager[T]:
+        return super().__getattribute__("_provider").acquire()
+
+
+class ImmutableAsyncProvider(typing.Generic[T]):
+    """Wrapper class to prevent mutating provider"""
+
+    state_name = "immutable_async_provider"
+
+    def __init__(self, provider: AsyncProvider[T]) -> None:
+        self._provider = provider
+
+    def __getattribute__(self, name: str) -> typing.Any:
+        allowed = ["get_state_name", "is_closed", "close_client", "acquire"]
+        if name in allowed:
+            return super().__getattribute__(name)
+        message = "'{}' object has no attribute '{}'"
+        raise AttributeError(
+            message.format(ImmutableSyncProvider.__name__, name)
+        )
+
+    def get_state_name(self):
+        return super().__getattribute__("_provider").state_name
+
+    def is_closed(self, client: T) -> bool:
+        return super().__getattribute__("_provider").is_closed(client)
+
+    def close_client(self, client: T) -> typing.Coroutine[None, None, None]:
+        return super().__getattribute__("_provider").close_client(client)
+
+    def acquire(self) -> typing.AsyncContextManager[T]:
+        return super().__getattribute__("_provider").acquire()
+
+
 @typing.runtime_checkable
 class AbstractSyncContext(typing.Protocol[T]):
-    provider: Provider[T]
-    inside_ctx: bool
+    _provider: Provider[T]
+    _inside_ctx: bool
 
     def __init__(self, provider: Provider[T]) -> None:
         ...
@@ -56,11 +117,14 @@ class AbstractSyncContext(typing.Protocol[T]):
     def begin(self) -> typing.ContextManager[T]:
         """Returns client from open context or a independent client if no context is open."""
 
+    def get_provider(self) -> ImmutableSyncProvider[T]:
+        """Returns internal provider"""
+
 
 @typing.runtime_checkable
 class AbstractAsyncContext(typing.Protocol[T]):
-    provider: AsyncProvider[T]
-    inside_ctx: bool
+    _provider: AsyncProvider[T]
+    _inside_ctx: bool
 
     def __init__(self, provider: AsyncProvider[T]) -> None:
         ...
@@ -78,27 +142,49 @@ class AbstractAsyncContext(typing.Protocol[T]):
     def begin(self) -> typing.AsyncContextManager[T]:
         """Returns client from open context or a independent client if no context is open."""
 
+    def get_provider(self) -> ImmutableAsyncProvider[T]:
+        """Returns internal provider"""
+
+
+AbstractContext = typing.TypeVar(
+    "AbstractContext", AbstractSyncContext, AbstractAsyncContext
+)
+
+
+class _StateApp(typing.Protocol):
+    state: typing.Type
+
+
+class _ContextApp(typing.Protocol):
+    context: typing.Type
+
+
+class _CtxApp(typing.Protocol):
+    ctx: typing.Type
+
 
 class _HasState(typing.Protocol):
     state: typing.Type
-    app: "HasState"
+    app: "_StateApp"
 
 
 class _HasContext(typing.Protocol):
     context: typing.Type
-    app: "HasState"
+    app: "_ContextApp"
 
 
 class _HasCtx(typing.Protocol):
     ctx: typing.Type
-    app: "HasState"
+    app: "_CtxApp"
 
+
+StateApp = typing.Union[_StateApp, _ContextApp, _CtxApp]
 
 HasState = typing.Union[_HasState, _HasContext, _HasCtx]
 
 
 class StateWrapper:
-    _valid_state_attrs = ["state", "context", "app"]
+    _valid_state_attrs = ["state", "context", "ctx"]
 
     def __init__(self, has_state: HasState) -> None:
         self.has_state = has_state
@@ -110,7 +196,10 @@ class StateWrapper:
         if not hasattr(self.has_state, "app"):
             raise TypeError("State Handler must have 'app' attribute")
 
-    def _get_state_attr(self, instance: HasState):
+    def _get_state_attr(
+        self,
+        instance: typing.Union[HasState, StateApp],
+    ):
         for item in self._valid_state_attrs:
             if hasattr(instance, item):
                 return item
@@ -129,21 +218,20 @@ class StateWrapper:
 
     @staticmethod
     def _get(state: type, name: str, _cast: type[T]) -> typing.Optional[T]:
-        try:
-            val = getattr(state, name)
-        except AttributeError:
-            return None
-        else:
-            return val
+        return getattr(state, name, None)
 
     @staticmethod
     def _set(state: type, name: str, val: typing.Any):
         setattr(state, name, val)
 
-    def app_get(self, name: str, _cast: type[T] = typing.Any) -> typing.Optional[T]:
+    def app_get(
+        self, name: str, _cast: type[T] = typing.Any
+    ) -> typing.Optional[T]:
         return self._get(self._app_state, name, _cast)
 
-    def get(self, name: str, _cast: type[T] = typing.Any) -> typing.Optional[T]:
+    def get(
+        self, name: str, _cast: type[T] = typing.Any
+    ) -> typing.Optional[T]:
         return self._get(self._instance_state, name, _cast)
 
     def app_set(self, name: str, val: typing.Any):
@@ -160,7 +248,9 @@ class AbstractSyncContextFactory(typing.Protocol[T]):
     _context_class: type[AbstractSyncContext[T]]
     _state_name: typing.Optional[str]
 
-    def _get_context(self, state_wrapper: StateWrapper) -> AbstractSyncContext[T]:
+    def _get_context(
+        self, state_wrapper: StateWrapper
+    ) -> AbstractSyncContext[T]:
         """Initializes Context"""
 
     def generate_state_name(self) -> str:
@@ -190,7 +280,9 @@ class AbstractAsyncContextFactory(typing.Protocol[T]):
     _context_class: type[AbstractAsyncContext[T]]
     _state_name: typing.Optional[str]
 
-    def _get_context(self, state_wrapper: StateWrapper) -> AbstractAsyncContext[T]:
+    def _get_context(
+        self, state_wrapper: StateWrapper
+    ) -> AbstractAsyncContext[T]:
         """Initializes Context"""
 
     def generate_state_name(self) -> str:
@@ -211,3 +303,45 @@ class AbstractAsyncContextFactory(typing.Protocol[T]):
 
     def from_provider(self, provider: type[AsyncProvider[T]]):
         """Returns context from a given provider"""
+
+
+class ContextGetter:
+    class ArgType(enum.Enum):
+        INSTANCE = enum.auto()
+        CONTEXT = enum.auto()
+        HAS_STATE = enum.auto()
+        VIEW = HAS_STATE
+
+        @classmethod
+        def get(cls, name: str):
+            return getattr(cls, name.upper())
+
+    def __init__(
+        self,
+        arg_type: ArgType,
+        *,
+        context_attr_name: typing.Optional[str] = None,
+        _factory: typing.Optional[
+            typing.Union[
+                AbstractAsyncContextFactory,
+                AbstractSyncContextFactory,
+            ]
+        ] = None,
+    ) -> None:
+        self.arg_type = arg_type
+        self.context_attr_name = context_attr_name
+        self.factory = _factory
+
+    def _instance(self, instance):
+        return getattr(instance, self.context_attr_name)  # type: ignore
+
+    def _context(self, context):
+        return context
+
+    def _has_state(self, has_state):
+        return self.factory(has_state)  # type: ignore
+
+    def get(self, first_arg):
+        return getattr(self, "_{}".format(self.arg_type.name.lower()))(
+            first_arg
+        )

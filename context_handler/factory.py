@@ -9,7 +9,8 @@ class _ContextFactory(typing.Generic[T]):
     def __init__(
         self,
         provider_class: typing.Union[
-            type[_datastructures.AsyncProvider[T]], type[_datastructures.Provider[T]]
+            type[_datastructures.AsyncProvider[T]],
+            type[_datastructures.Provider[T]],
         ],
         context_class: typing.Union[
             type[_datastructures.AbstractAsyncContext[T]],
@@ -26,23 +27,23 @@ class _ContextFactory(typing.Generic[T]):
     @staticmethod
     def generate_state_name(
         provider_class: typing.Union[
-            type[_datastructures.AsyncProvider[T]], type[_datastructures.Provider[T]]
+            type[_datastructures.AsyncProvider[T]],
+            type[_datastructures.Provider[T]],
         ]
     ):
         return provider_class.state_name.lower().replace("provider", "context")
 
     def has_active_context(self, has_state: _datastructures.HasState):
-        return bool(self._get_active_context(_datastructures.StateWrapper(has_state)))
+        return bool(
+            self._get_active_context(_datastructures.StateWrapper(has_state))
+        )
 
     def _get_active_context(self, state_wrapper: _datastructures.StateWrapper):
         return state_wrapper.get(self._state_name, self._context_class)
 
     def _set_active_context(
         self,
-        context: typing.Union[
-            _datastructures.AbstractAsyncContext[T],
-            _datastructures.AbstractSyncContext[T],
-        ],
+        context: _datastructures.AbstractContext,
         state_wrapper: _datastructures.StateWrapper,
     ):
         state_wrapper.set(self._state_name, context)
@@ -51,7 +52,9 @@ class _ContextFactory(typing.Generic[T]):
         provider = state_wrapper.app_get(
             self._provider_class.state_name, self._provider_class
         )
-        if not provider:
+        if not isinstance(
+            provider, (_datastructures.AsyncProvider, _datastructures.Provider)
+        ):
             raise exc.NoProviderInState(
                 "State Handler does not have provider instantiated"
             )
@@ -68,7 +71,8 @@ class _ContextFactory(typing.Generic[T]):
     def from_provider(
         self,
         provider: typing.Union[
-            type[_datastructures.AsyncProvider[T]], type[_datastructures.Provider[T]]
+            type[_datastructures.AsyncProvider[T]],
+            type[_datastructures.Provider[T]],
         ],
     ) -> typing.Union[
         _datastructures.AbstractAsyncContext[T],
@@ -78,7 +82,7 @@ class _ContextFactory(typing.Generic[T]):
 
 
 @typing.overload
-def get_factory(
+def context_factory(
     provider_class: type[_datastructures.AsyncProvider[T]],
     context_class: type[_datastructures.AbstractAsyncContext[T]],
     context_state_name: typing.Optional[str] = None,
@@ -87,7 +91,7 @@ def get_factory(
 
 
 @typing.overload
-def get_factory(
+def context_factory(
     provider_class: type[_datastructures.Provider[T]],
     context_class: type[_datastructures.AbstractSyncContext[T]],
     context_state_name: typing.Optional[str] = None,
@@ -95,9 +99,28 @@ def get_factory(
     ...
 
 
-def get_factory(
+@typing.overload
+def context_factory(
     provider_class: typing.Union[
-        type[_datastructures.AsyncProvider[T]], type[_datastructures.Provider[T]]
+        type[_datastructures.AsyncProvider[T]],
+        type[_datastructures.Provider[T]],
+    ],
+    context_class: typing.Union[
+        type[_datastructures.AbstractAsyncContext[T]],
+        type[_datastructures.AbstractSyncContext[T]],
+    ],
+    context_state_name: typing.Optional[str] = None,
+) -> typing.Union[
+    _datastructures.AbstractAsyncContextFactory[T],
+    _datastructures.AbstractSyncContextFactory[T],
+]:
+    ...
+
+
+def context_factory(
+    provider_class: typing.Union[
+        type[_datastructures.AsyncProvider[T]],
+        type[_datastructures.Provider[T]],
     ],
     context_class: typing.Union[
         type[_datastructures.AbstractAsyncContext[T]],
@@ -111,3 +134,6 @@ def get_factory(
     return _ContextFactory(
         provider_class, context_class, context_state_name
     )  # type:ignore
+
+
+generate_state_name = _ContextFactory.generate_state_name

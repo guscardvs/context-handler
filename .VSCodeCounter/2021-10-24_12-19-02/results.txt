@@ -1,0 +1,61 @@
+Date : 2021-10-24 12:19:02
+Directory : /home/gustavocorrea/Documentos/context-handler
+Total : 26 files,  3005 codes, 124 comments, 603 blanks, all 3732 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| TOML     |          2 |      1,087 |          0 |         97 |      1,184 |
+| Python   |         17 |      1,047 |         39 |        303 |      1,389 |
+| Ini      |          2 |        486 |          1 |        160 |        647 |
+| YAML     |          1 |        304 |         84 |          6 |        394 |
+| Markdown |          2 |         71 |          0 |         35 |        106 |
+| Makefile |          1 |          9 |          0 |          2 |         11 |
+| XML      |          1 |          1 |          0 |          0 |          1 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                               | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                  |         26 |      3,005 |        124 |        603 |      3,732 |
+| .artifacts                                                                         |          1 |          1 |          0 |          0 |          1 |
+| context_handler                                                                    |          8 |        832 |         39 |        227 |      1,098 |
+| context_handler/adapters                                                           |          2 |        161 |          0 |         34 |        195 |
+| tests                                                                              |          9 |        215 |          0 |         76 |        291 |
+| tests/mocks                                                                        |          5 |         63 |          0 |         34 |         97 |
++------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                           | language | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /home/gustavocorrea/Documentos/context-handler/.artifacts/tests.xml                | XML      |          1 |          0 |          0 |          1 |
+| /home/gustavocorrea/Documentos/context-handler/.coveragerc                         | Ini      |         25 |          0 |          6 |         31 |
+| /home/gustavocorrea/Documentos/context-handler/.pylintrc                           | Ini      |        461 |          1 |        154 |        616 |
+| /home/gustavocorrea/Documentos/context-handler/CHANGELOG.md                        | Markdown |          6 |          0 |          6 |         12 |
+| /home/gustavocorrea/Documentos/context-handler/Makefile                            | Makefile |          9 |          0 |          2 |         11 |
+| /home/gustavocorrea/Documentos/context-handler/README.md                           | Markdown |         65 |          0 |         29 |         94 |
+| /home/gustavocorrea/Documentos/context-handler/bandit.yaml                         | YAML     |        304 |         84 |          6 |        394 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/__init__.py         | Python   |         28 |          0 |          3 |         31 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/_datastructures.py  | Python   |        212 |         34 |        102 |        348 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/adapters/fastapi.py | Python   |         84 |          0 |         17 |        101 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/adapters/sanic.py   | Python   |         77 |          0 |         17 |         94 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/context.py          | Python   |        100 |          0 |         29 |        129 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/exc.py              | Python   |          8 |          5 |         10 |         23 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/factory.py          | Python   |        119 |          0 |         22 |        141 |
+| /home/gustavocorrea/Documentos/context-handler/context_handler/utils.py            | Python   |        204 |          0 |         27 |        231 |
+| /home/gustavocorrea/Documentos/context-handler/poetry.lock                         | TOML     |      1,049 |          0 |         89 |      1,138 |
+| /home/gustavocorrea/Documentos/context-handler/pyproject.toml                      | TOML     |         38 |          0 |          8 |         46 |
+| /home/gustavocorrea/Documentos/context-handler/tests/__init__.py                   | Python   |          0 |          0 |          1 |          1 |
+| /home/gustavocorrea/Documentos/context-handler/tests/conftest.py                   | Python   |         26 |          0 |         15 |         41 |
+| /home/gustavocorrea/Documentos/context-handler/tests/mocks/__init__.py             | Python   |          0 |          0 |          1 |          1 |
+| /home/gustavocorrea/Documentos/context-handler/tests/mocks/client.py               | Python   |          6 |          0 |          4 |         10 |
+| /home/gustavocorrea/Documentos/context-handler/tests/mocks/has_state.py            | Python   |         16 |          0 |         10 |         26 |
+| /home/gustavocorrea/Documentos/context-handler/tests/mocks/provider.py             | Python   |         24 |          0 |         12 |         36 |
+| /home/gustavocorrea/Documentos/context-handler/tests/mocks/state.py                | Python   |         17 |          0 |          7 |         24 |
+| /home/gustavocorrea/Documentos/context-handler/tests/test_context.py               | Python   |         36 |          0 |          6 |         42 |
+| /home/gustavocorrea/Documentos/context-handler/tests/test_datastructures.py        | Python   |         90 |          0 |         20 |        110 |
+| Total                                                                              |          |      3,005 |        124 |        603 |      3,732 |
++------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
