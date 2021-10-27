@@ -58,7 +58,7 @@ class SyncContext(typing.Generic[T]):
             raise error
 
     def _contexted_begin(self):
-        yield self._client
+        yield self.client
 
     def _contexted_open(self):
         yield
@@ -138,7 +138,7 @@ class AsyncContext(typing.Generic[T]):
             raise error
 
     async def _contexted_begin(self):
-        yield self._client
+        yield self.client
 
     async def _contexted_open(self):
         yield
