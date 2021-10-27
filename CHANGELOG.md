@@ -1,3 +1,9 @@
+## 1.1.0 (2021-10-27)
+
+### Feat
+
+- **global**: added support to python3.8 and forward versions
+
 ## 1.0.1 (2021-10-27)
 
 ### Fix
