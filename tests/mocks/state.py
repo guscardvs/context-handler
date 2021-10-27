@@ -1,16 +1,16 @@
-from typing import Any
+import typing
 
 
 class State:
-    _state: dict[str, Any]
+    _state: typing.Dict[str, typing.Any]
 
     def __init__(self) -> None:
         super().__setattr__("_state", {})
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __setattr__(self, name: str, value: typing.Any) -> None:
         self._state[name] = value
 
-    def __getattr__(self, name: str) -> Any:
+    def __getattr__(self, name: str) -> typing.Any:
         try:
             result = self._state[name]
         except KeyError:

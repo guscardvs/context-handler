@@ -217,7 +217,7 @@ class StateWrapper:
         return getattr(self.has_state, self._app_state_attr)
 
     @staticmethod
-    def _get(state: type, name: str, _cast: type[T]) -> typing.Optional[T]:
+    def _get(state: type, name: str, _cast: typing.Type[T]) -> typing.Optional[T]:
         return getattr(state, name, None)
 
     @staticmethod
@@ -225,12 +225,12 @@ class StateWrapper:
         setattr(state, name, val)
 
     def app_get(
-        self, name: str, _cast: type[T] = typing.Any
+        self, name: str, _cast: typing.Type[T] = typing.Any
     ) -> typing.Optional[T]:
         return self._get(self._app_state, name, _cast)
 
     def get(
-        self, name: str, _cast: type[T] = typing.Any
+        self, name: str, _cast: typing.Type[T] = typing.Any
     ) -> typing.Optional[T]:
         return self._get(self._instance_state, name, _cast)
 
@@ -244,8 +244,8 @@ class StateWrapper:
 class AbstractSyncContextFactory(typing.Protocol[T]):
     """Creates a Context Factory to handle contexts inside a state"""
 
-    _provider_class: type[Provider[T]]
-    _context_class: type[AbstractSyncContext[T]]
+    _provider_class: typing.Type[Provider[T]]
+    _context_class: typing.Type[AbstractSyncContext[T]]
     _state_name: typing.Optional[str]
 
     def _get_context(
@@ -269,15 +269,15 @@ class AbstractSyncContextFactory(typing.Protocol[T]):
     def __call__(self, has_state: HasState) -> AbstractSyncContext[T]:
         """Returns context from has_state if exists or opens new context, stores in state, and then returns state"""
 
-    def from_provider(self, provider: type[Provider[T]]):
+    def from_provider(self, provider: typing.Type[Provider[T]]):
         """Returns context from a given provider"""
 
 
 class AbstractAsyncContextFactory(typing.Protocol[T]):
     """Creates a Context Factory to handle contexts inside a state"""
 
-    _provider_class: type[AsyncProvider[T]]
-    _context_class: type[AbstractAsyncContext[T]]
+    _provider_class: typing.Type[AsyncProvider[T]]
+    _context_class: typing.Type[AbstractAsyncContext[T]]
     _state_name: typing.Optional[str]
 
     def _get_context(
@@ -301,7 +301,7 @@ class AbstractAsyncContextFactory(typing.Protocol[T]):
     def __call__(self, has_state: HasState) -> AbstractAsyncContext[T]:
         """Returns context from has_state if exists or opens new context, stores in state, and then returns state"""
 
-    def from_provider(self, provider: type[AsyncProvider[T]]):
+    def from_provider(self, provider: typing.Type[AsyncProvider[T]]):
         """Returns context from a given provider"""
 
 

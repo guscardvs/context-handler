@@ -5,7 +5,7 @@ description = ""
 authors = ["Gustavo Correa <self.gustavocorrea@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.8,<4.0"
 typing-extensions = "^3.10.0"
 fastapi = {version = "^0.70.0", optional = true}
 sanic = {version = "^21.9.1", optional = true}

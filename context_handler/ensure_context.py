@@ -225,7 +225,7 @@ def async_context(
 
 
 def _guess_context_class(
-    provider_class: type[
+    provider_class: typing.Type[
         typing.Union[_datastructures.Provider, _datastructures.AsyncProvider]
     ]
 ):

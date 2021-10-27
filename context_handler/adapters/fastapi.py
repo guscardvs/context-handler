@@ -34,8 +34,8 @@ def setup_context_cleaner_middleware(app: _fastapi.FastAPI):
 
 
 def _get_provider_list(
-    _app_state_dict: dict[str, typing.Any]
-) -> list[
+    _app_state_dict: typing.Dict[str, typing.Any]
+) -> typing.List[
     typing.Union[_datastructures.Provider, _datastructures.AsyncProvider]
 ]:
     def _gen():
@@ -50,10 +50,10 @@ def _get_provider_list(
 
 
 def _get_contexts_from_providers(
-    provider_list: list[
+    provider_list: typing.List[
         typing.Union[_datastructures.Provider, _datastructures.AsyncProvider]
     ],
-    request_state_dict: dict[str, typing.Any],
+    request_state_dict: typing.Dict[str, typing.Any],
 ):
     def _gen():
         for provider in provider_list:
@@ -67,7 +67,7 @@ def _get_contexts_from_providers(
     return list(_gen())
 
 
-def _get_contexts_by_type(request_state_dict: dict[str, typing.Any]):
+def _get_contexts_by_type(request_state_dict: typing.Dict[str, typing.Any]):
     def _gen():
         for value in request_state_dict.values():
             if isinstance(
@@ -83,7 +83,7 @@ def _get_contexts_by_type(request_state_dict: dict[str, typing.Any]):
 
 
 async def _close_active_contexts(
-    contexts: frozenset[
+    contexts: typing.FrozenSet[
         typing.Union[
             _datastructures.AbstractAsyncContext,
             _datastructures.AbstractSyncContext,

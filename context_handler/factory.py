@@ -9,12 +9,12 @@ class _ContextFactory(typing.Generic[T]):
     def __init__(
         self,
         provider_class: typing.Union[
-            type[_datastructures.AsyncProvider[T]],
-            type[_datastructures.Provider[T]],
+            typing.Type[_datastructures.AsyncProvider[T]],
+            typing.Type[_datastructures.Provider[T]],
         ],
         context_class: typing.Union[
-            type[_datastructures.AbstractAsyncContext[T]],
-            type[_datastructures.AbstractSyncContext[T]],
+            typing.Type[_datastructures.AbstractAsyncContext[T]],
+            typing.Type[_datastructures.AbstractSyncContext[T]],
         ],
         context_state_name: typing.Optional[str] = None,
     ) -> None:
@@ -27,8 +27,8 @@ class _ContextFactory(typing.Generic[T]):
     @staticmethod
     def generate_state_name(
         provider_class: typing.Union[
-            type[_datastructures.AsyncProvider[T]],
-            type[_datastructures.Provider[T]],
+            typing.Type[_datastructures.AsyncProvider[T]],
+            typing.Type[_datastructures.Provider[T]],
         ]
     ):
         return provider_class.state_name.lower().replace("provider", "context")
@@ -71,8 +71,8 @@ class _ContextFactory(typing.Generic[T]):
     def from_provider(
         self,
         provider: typing.Union[
-            type[_datastructures.AsyncProvider[T]],
-            type[_datastructures.Provider[T]],
+            typing.Type[_datastructures.AsyncProvider[T]],
+            typing.Type[_datastructures.Provider[T]],
         ],
     ) -> typing.Union[
         _datastructures.AbstractAsyncContext[T],
@@ -83,8 +83,8 @@ class _ContextFactory(typing.Generic[T]):
 
 @typing.overload
 def context_factory(
-    provider_class: type[_datastructures.AsyncProvider[T]],
-    context_class: type[_datastructures.AbstractAsyncContext[T]],
+    provider_class: typing.Type[_datastructures.AsyncProvider[T]],
+    context_class: typing.Type[_datastructures.AbstractAsyncContext[T]],
     context_state_name: typing.Optional[str] = None,
 ) -> _datastructures.AbstractAsyncContextFactory[T][T]:
     ...
@@ -92,8 +92,8 @@ def context_factory(
 
 @typing.overload
 def context_factory(
-    provider_class: type[_datastructures.Provider[T]],
-    context_class: type[_datastructures.AbstractSyncContext[T]],
+    provider_class: typing.Type[_datastructures.Provider[T]],
+    context_class: typing.Type[_datastructures.AbstractSyncContext[T]],
     context_state_name: typing.Optional[str] = None,
 ) -> _datastructures.AbstractSyncContextFactory[T][T]:
     ...
@@ -102,12 +102,12 @@ def context_factory(
 @typing.overload
 def context_factory(
     provider_class: typing.Union[
-        type[_datastructures.AsyncProvider[T]],
-        type[_datastructures.Provider[T]],
+        typing.Type[_datastructures.AsyncProvider[T]],
+        typing.Type[_datastructures.Provider[T]],
     ],
     context_class: typing.Union[
-        type[_datastructures.AbstractAsyncContext[T]],
-        type[_datastructures.AbstractSyncContext[T]],
+        typing.Type[_datastructures.AbstractAsyncContext[T]],
+        typing.Type[_datastructures.AbstractSyncContext[T]],
     ],
     context_state_name: typing.Optional[str] = None,
 ) -> typing.Union[
@@ -119,12 +119,12 @@ def context_factory(
 
 def context_factory(
     provider_class: typing.Union[
-        type[_datastructures.AsyncProvider[T]],
-        type[_datastructures.Provider[T]],
+        typing.Type[_datastructures.AsyncProvider[T]],
+        typing.Type[_datastructures.Provider[T]],
     ],
     context_class: typing.Union[
-        type[_datastructures.AbstractAsyncContext[T]],
-        type[_datastructures.AbstractSyncContext[T]],
+        typing.Type[_datastructures.AbstractAsyncContext[T]],
+        typing.Type[_datastructures.AbstractSyncContext[T]],
     ],
     context_state_name: typing.Optional[str] = None,
 ) -> typing.Union[
