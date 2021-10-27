@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "context-handler"
-version = "1.0.0"
+version = "1.0.1"
 description = ""
 authors = ["Gustavo Correa <self.gustavocorrea@gmail.com>"]
 
@@ -32,7 +32,7 @@ profile = "black"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "1.0.0"
+version = "1.0.1"
 tag_format = "$version"
 annotated_tag = true
 version_files = [
