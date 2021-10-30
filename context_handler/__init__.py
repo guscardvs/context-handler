@@ -8,22 +8,22 @@ __version_info__ = tuple(
 
 from . import exc
 from ._datastructures import (
-    ContextGetter,
     ImmutableAsyncProvider,
     ImmutableSyncProvider,
     StateWrapper,
 )
 from .context import AsyncContext, SyncContext
 from . import ensure_context
-from .factory import context_factory
+from .getters import get_context, context_factory, ArgType
 
 __all__ = [
     "AsyncContext",
     "SyncContext",
     "context_factory",
+    "get_context",
     "exc",
     "ensure_context",
-    "ContextGetter",
+    "ArgType",
     "ImmutableSyncProvider",
     "ImmutableAsyncProvider",
     "StateWrapper",
