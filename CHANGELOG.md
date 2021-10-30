@@ -1,3 +1,9 @@
+## 1.2.0 (2021-10-30)
+
+### Feat
+
+- **getters**: created getters to use abstract interfaces instead of concrete implementations
+
 ## 1.1.0 (2021-10-27)
 
 ### Feat
