@@ -1,13 +1,12 @@
 import pytest
 
 from context_handler import (
-    ContextGetter,
     ImmutableAsyncProvider,
     ImmutableSyncProvider,
     StateWrapper,
     SyncContext,
 )
-from context_handler._datastructures import AbstractSyncContextFactory
+from context_handler._datastructures import AbstractSyncContextFactory, ContextGetter
 from tests.mocks.instance import MockInstance
 
 from .mocks import has_state

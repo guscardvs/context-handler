@@ -1,11 +1,9 @@
 import pytest
-from context_handler import ensure_context, context_factory, exc
+
+from context_handler import context_factory, ensure_context, exc
+from context_handler._datastructures import AbstractAsyncContext, AbstractSyncContext
 from context_handler.context import AsyncContext, SyncContext
-from context_handler._datastructures import (
-    AbstractAsyncContext,
-    AbstractSyncContext,
-)
-from tests.mocks import provider, instance, has_state, client
+from tests.mocks import client, has_state, instance, provider
 
 sync_factory = context_factory(provider.MockProvider, SyncContext)
 async_factory = context_factory(provider.MockAsyncProvider, AsyncContext)

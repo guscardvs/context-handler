@@ -6,21 +6,19 @@ __version_info__ = tuple(
     )
 )
 
-from . import exc
-from ._datastructures import (
-    ImmutableAsyncProvider,
-    ImmutableSyncProvider,
-    StateWrapper,
-)
+from . import ensure_context, exc
+from ._datastructures import ImmutableAsyncProvider, ImmutableSyncProvider, StateWrapper
 from .context import AsyncContext, SyncContext
-from . import ensure_context
-from .getters import get_context, context_factory, ArgType
+from .generic import AsyncGenericFactory, GenericFactory
+from .getters import ArgType, context_factory, get_context
 
 __all__ = [
     "AsyncContext",
     "SyncContext",
     "context_factory",
     "get_context",
+    "GenericFactory",
+    "AsyncGenericFactory",
     "exc",
     "ensure_context",
     "ArgType",

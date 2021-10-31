@@ -217,7 +217,9 @@ class StateWrapper:
         return getattr(self.has_state, self._app_state_attr)
 
     @staticmethod
-    def _get(state: type, name: str, _cast: typing.Type[T]) -> typing.Optional[T]:
+    def _get(
+        state: type, name: str, _cast: typing.Type[T]
+    ) -> typing.Optional[T]:
         return getattr(state, name, None)
 
     @staticmethod

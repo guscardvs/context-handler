@@ -1,7 +1,6 @@
 import typing
-from functools import partial, wraps
-from inspect import isasyncgenfunction, iscoroutinefunction
-from types import SimpleNamespace
+from functools import wraps
+from inspect import isasyncgenfunction, iscoroutinefunction, isgeneratorfunction
 
 from typing_extensions import ParamSpec
 
@@ -229,13 +228,50 @@ def _guess_context_class(
         typing.Union[_datastructures.Provider, _datastructures.AsyncProvider]
     ]
 ):
-    if issubclass(provider_class, _datastructures.AsyncProvider):
+    if _is_valid_async_provider(provider_class):
         return context.AsyncContext
-    elif issubclass(provider_class, _datastructures.Provider):
+    elif _is_valid_sync_provider(provider_class):
         return context.SyncContext
     raise TypeError(
         "provider_class must implement either _datastructures.Provider or _datastructures.AsyncProvider protocol"
     )
+
+
+def _is_valid_provider(provider_class):
+    has_methods = all(
+        hasattr(provider_class, item)
+        for item in ["state_name", "is_closed", "close_client", "acquire"]
+    )
+    methods_are_valid = isinstance(
+        provider_class.state_name, str
+    ) and callable(provider_class.is_closed)
+    return has_methods and methods_are_valid
+
+
+def _is_valid_async_provider(provider_class):
+    is_valid_provider = _is_valid_provider(provider_class)
+    methods_have_valid_types = iscoroutinefunction(
+        provider_class.close_client
+    ) and (
+        (
+            hasattr(provider_class.acquire, "__aenter__")
+            and hasattr(provider_class.acquire, "__aexit__")
+        )
+        or isasyncgenfunction(provider_class.acquire.__wrapped__)
+    )
+    return is_valid_provider and methods_have_valid_types
+
+
+def _is_valid_sync_provider(provider_class):
+    is_valid_provider = _is_valid_provider(provider_class)
+    methods_have_valid_types = callable(provider_class.close_client) and (
+        (
+            hasattr(provider_class.acquire, "__enter__")
+            and hasattr(provider_class.acquire, "__exit__")
+        )
+        or isgeneratorfunction(provider_class.acquire.__wrapped__)
+    )
+    return is_valid_provider and methods_have_valid_types
 
 
 __all__ = ["sync_context", "async_context"]

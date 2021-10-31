@@ -79,4 +79,3 @@ class _ContextFactory(typing.Generic[T]):
         _datastructures.AbstractSyncContext[T],
     ]:
         return self._context_class(provider)  # type: ignore
-
