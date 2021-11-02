@@ -1,10 +1,18 @@
 import collections.abc as collections
+from inspect import Parameter
 import typing
 
 import fastapi as _fastapi
 
 from context_handler import _datastructures
-from context_handler.factory import generate_state_name
+from context_handler.generic import (
+    _GenericContextFactory,
+    _GenericAsyncContextFactory,
+    AsyncProviderT,
+    ClientT,
+    ProviderT,
+)
+from context_handler.getters import generate_state_name
 
 
 def setup_context_cleaner_middleware(app: _fastapi.FastAPI):
@@ -98,3 +106,31 @@ async def _close_active_contexts(
                     await provider.close_client(ctx.client)
                 else:
                     provider.close_client(ctx.client)
+
+
+def _get_param():
+    return Parameter(
+        "has_state", Parameter.KEYWORD_ONLY, annotation=_fastapi.Request
+    )
+
+
+class _FastapiGenericFactory(_GenericContextFactory):
+    _get_param = _get_param  # type: ignore
+
+
+class _FastapiAsyncGenericFactory(_GenericAsyncContextFactory):
+    _get_param = _get_param  # type: ignore
+
+
+class FAGenericFactory(
+    _FastapiGenericFactory, typing.Generic[ProviderT, ClientT]
+):
+    def get(self) -> _datastructures.AbstractSyncContext[ClientT]:
+        return super().get()
+
+
+class FAAsyncGenericFactoryy(
+    _FastapiAsyncGenericFactory, typing.Generic[AsyncProviderT, ClientT]
+):
+    def get(self) -> _datastructures.AbstractAsyncContext[ClientT]:
+        return super().get()

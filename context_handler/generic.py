@@ -1,6 +1,8 @@
+from inspect import Parameter, Signature, signature
 import typing
 
 from context_handler import _datastructures, ensure_context, getters
+from context_handler.context import AsyncContext, SyncContext
 
 GenericContextFactoryT = typing.TypeVar(
     "GenericContextFactoryT", bound="_GenericContextFactory"
@@ -18,6 +20,14 @@ AsyncProviderT = typing.TypeVar(
 class _GenericContextFactory:
     _factory: _datastructures.AbstractSyncContextFactory
 
+    @classmethod
+    def _get_param(cls):
+        return Parameter(
+            "has_state",
+            Parameter.KEYWORD_ONLY,
+            annotation=_datastructures.HasState,
+        )
+
     def __class_getitem__(
         cls: typing.Type[GenericContextFactoryT],
         params: typing.Tuple[
@@ -28,7 +38,12 @@ class _GenericContextFactory:
             raise NotImplementedError
         provider_class = params[0]
         context_class = ensure_context._guess_context_class(provider_class)
-        new_t = type("{}[{}]".format(cls.__name__, ",".join(param.__name__ for param in params)), (cls,), {"_factory": getters.context_factory(provider_class, context_class)})  # type: ignore
+        namespace: dict[str, typing.Any] = {
+            "__module__": cls.__module__,
+            "_factory": getters.context_factory(provider_class, context_class),
+        }
+        new_t = type("{}[{}]".format(cls.__name__, ",".join(param.__name__ for param in params)), (cls,), namespace)  # type: ignore
+        new_t.__signature__ = Signature(parameters=[cls._get_param()])
         return new_t  # type: ignore
 
     def __init__(self, has_state: _datastructures.HasState):
@@ -41,6 +56,14 @@ class _GenericContextFactory:
 class _GenericAsyncContextFactory:
     _factory: _datastructures.AbstractAsyncContextFactory
 
+    @classmethod
+    def _get_param(cls):
+        return Parameter(
+            "has_state",
+            Parameter.KEYWORD_ONLY,
+            annotation=_datastructures.HasState,
+        )
+
     def __class_getitem__(
         cls: typing.Type[AsyncGenericContextFactoryT],
         params: typing.Tuple[typing.Type[_datastructures.Provider], ...],
@@ -49,7 +72,12 @@ class _GenericAsyncContextFactory:
             raise NotImplementedError
         provider_class = params[0]
         context_class = ensure_context._guess_context_class(provider_class)
-        new_t = type("{}[{}]".format(cls.__name__, ",".join(param.__name__ for param in params)), (cls,), {"_factory": getters.context_factory(provider_class, context_class)})  # type: ignore
+        namespace: dict[str, typing.Any] = {
+            "__module__": cls.__module__,
+            "_factory": getters.context_factory(provider_class, context_class),
+        }
+        new_t = type("{}[{}]".format(cls.__name__, ",".join(param.__name__ for param in params)), (cls,), namespace)  # type: ignore
+        new_t.__signature__ = Signature(parameters=[cls._get_param()])
         return new_t  # type: ignore
 
     def __init__(self, has_state: _datastructures.HasState):
@@ -70,5 +98,5 @@ class AsyncGenericFactory(
     _GenericAsyncContextFactory,
     typing.Generic[AsyncProviderT, ClientT],
 ):
-    def get(self) -> _datastructures.AbstractAsyncContext[ClientT]:
+    def get(self) ->  _datastructures.AbstractAsyncContext[ClientT]:
         return super().get()

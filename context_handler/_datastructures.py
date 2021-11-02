@@ -1,6 +1,7 @@
 import enum
 import typing
 
+
 T = typing.TypeVar("T")
 
 
@@ -98,7 +99,7 @@ class ImmutableAsyncProvider(typing.Generic[T]):
 
 @typing.runtime_checkable
 class AbstractSyncContext(typing.Protocol[T]):
-    _provider: Provider[T]
+    _provider: ImmutableSyncProvider[T]
     _inside_ctx: bool
 
     def __init__(self, provider: Provider[T]) -> None:
@@ -123,7 +124,7 @@ class AbstractSyncContext(typing.Protocol[T]):
 
 @typing.runtime_checkable
 class AbstractAsyncContext(typing.Protocol[T]):
-    _provider: AsyncProvider[T]
+    _provider: ImmutableAsyncProvider[T]
     _inside_ctx: bool
 
     def __init__(self, provider: AsyncProvider[T]) -> None:
@@ -347,3 +348,23 @@ class ContextGetter:
         return getattr(self, "_{}".format(self.arg_type.name.lower()))(
             first_arg
         )
+
+
+ImmutableProviderT = typing.TypeVar(
+    "ImmutableProviderT", ImmutableSyncProvider, ImmutableAsyncProvider
+)
+
+
+class ImmutableWrapper(typing.Generic[ImmutableProviderT]):
+    def __init__(
+        self,
+        name: str,
+        immutable_provider: typing.Type[ImmutableProviderT],
+    ) -> None:
+        self.name = name
+        self.immutable_provider = immutable_provider
+
+    def __get__(self, instance, owner=None) -> ImmutableProviderT:
+        if instance is not None:
+            return self.immutable_provider(getattr(instance, self.name))
+        raise AttributeError(f"{self.name!r} object has no attribute {owner.__name__!r}")

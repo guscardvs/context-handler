@@ -1,0 +1,12 @@
+site_name: Context Handler
+theme:
+  name: material
+nav:
+  - "index.md"
+  - "Protocols":
+      - "protocols/provider.md"
+      - "protocols/async-provider.md"
+  - "Tools":
+      - "tools/factory.md"
+      - "tools/generic.md"
+      - "tools/ensure-context.md"

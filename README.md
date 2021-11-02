@@ -41,9 +41,9 @@ context = SyncContext[Connection](ConnectionProvider())
 with context.open():
     with context.begin() as client:  # client here is a sqlalchemy.Connection instance
         client.execute(sql_stmt)
-    make_some_query(context), make_some_query(context), make_some_query(context)  # client inside these functions is the same instance from the last .begin() call
-
-# outside .open(), sqlalchemy.Connection is no longer available
+    # client inside these functions is the same instance from the last .begin() call
+    make_some_query(context), make_some_query(context), make_some_query(context)
+# outside .open(), Connection is no longer available
 ```
 
 - Example with aiohttp.ClientSession

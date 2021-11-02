@@ -7,6 +7,10 @@ T = typing.TypeVar("T")
 
 
 class SyncContext(typing.Generic[T]):
+    provider = _datastructures.ImmutableWrapper(
+        "_provider", _datastructures.ImmutableSyncProvider[T]
+    )
+
     def __init__(self, provider: _datastructures.Provider[T]) -> None:
         self._provider = provider
         self._inside_ctx = False
@@ -15,7 +19,7 @@ class SyncContext(typing.Generic[T]):
     def in_context(self):
         if self._client is None:
             return False
-        return not self.get_provider().is_closed(self._client)
+        return not self.provider.is_closed(self._client)
 
     @property
     def client(self) -> T:
@@ -29,14 +33,14 @@ class SyncContext(typing.Generic[T]):
     def _reset_context(self):
         if self._client is None:
             return
-        if not self.get_provider().is_closed(self._client):
-            self.get_provider().close_client(self._client)
+        if not self.provider.is_closed(self._client):
+            self.provider.close_client(self._client)
         self._set_client(None)
         self._inside_ctx = False
 
     def _open_context(self):
         error = None
-        with self.get_provider().acquire() as client:
+        with self.provider.acquire() as client:
             self._set_client(client)
             self._inside_ctx = True
             try:
@@ -49,7 +53,7 @@ class SyncContext(typing.Generic[T]):
 
     def _begin_context(self):
         error = None
-        with self.get_provider().acquire() as client:
+        with self.provider.acquire() as client:
             try:
                 yield client
             except Exception as err:
@@ -75,18 +79,15 @@ class SyncContext(typing.Generic[T]):
             return self._contexted_open()
         return self._open_context()
 
-    def __getattribute__(self, name: str) -> typing.Any:
-        if name == "_provider":
-            name = "invalid"
-        return super().__getattribute__(name)
-
     def get_provider(self) -> _datastructures.ImmutableSyncProvider[T]:
-        return _datastructures.ImmutableSyncProvider(
-            super().__getattribute__("_provider")
-        )
+        return self.provider
 
 
 class AsyncContext(typing.Generic[T]):
+    provider = _datastructures.ImmutableWrapper(
+        "_provider", _datastructures.ImmutableAsyncProvider[T]
+    )
+
     def __init__(self, provider: _datastructures.AsyncProvider[T]) -> None:
         self._provider = provider
         self._inside_ctx = False
@@ -95,7 +96,7 @@ class AsyncContext(typing.Generic[T]):
     def in_context(self):
         if self._client is None:
             return False
-        return not self.get_provider().is_closed(self._client)
+        return not self.provider.is_closed(self._client)
 
     @property
     def client(self) -> T:
@@ -109,14 +110,14 @@ class AsyncContext(typing.Generic[T]):
     async def _reset_context(self):
         if self._client is None:
             return
-        if not self.get_provider().is_closed(self._client):
-            await self.get_provider().close_client(self._client)
+        if not self.provider.is_closed(self._client):
+            await self.provider.close_client(self._client)
         self._set_client(None)
         self._inside_ctx = False
 
     async def _open_context(self):
         error = None
-        async with self.get_provider().acquire() as client:
+        async with self.provider.acquire() as client:
             self._set_client(client)
             self._inside_ctx = True
             try:
@@ -129,7 +130,7 @@ class AsyncContext(typing.Generic[T]):
 
     async def _begin_context(self):
         error = None
-        async with self.get_provider().acquire() as client:
+        async with self.provider.acquire() as client:
             try:
                 yield client
             except Exception as err:
@@ -155,12 +156,5 @@ class AsyncContext(typing.Generic[T]):
             return self._contexted_open()
         return self._open_context()
 
-    def __getattribute__(self, name: str) -> typing.Any:
-        if name == "_provider":
-            name = "invalid"
-        return super().__getattribute__(name)
-
     def get_provider(self) -> _datastructures.ImmutableAsyncProvider[T]:
-        return _datastructures.ImmutableAsyncProvider(
-            super().__getattribute__("_provider")
-        )
+        return self.provider
