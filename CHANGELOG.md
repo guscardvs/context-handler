@@ -1,3 +1,9 @@
+## 1.3.0 (2021-11-02)
+
+### Feat
+
+- **generics**: fixed bug in generics with fastapi where no signature was generated and added a fastapi specific generic
+
 ## 1.2.1 (2021-10-31)
 
 ### Fix
