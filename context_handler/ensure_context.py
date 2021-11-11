@@ -1,6 +1,8 @@
 import typing
+from asyncio import iscoroutinefunction
+from asyncio.coroutines import _is_coroutine  # noqa
 from functools import wraps
-from inspect import isasyncgenfunction, iscoroutinefunction, isgeneratorfunction
+from inspect import isasyncgenfunction, isgeneratorfunction
 
 from typing_extensions import ParamSpec
 
@@ -73,6 +75,8 @@ def _setup_wrapper(wrapper: typing.Callable, func, context_getter):
     def wrapped(*args, **kwargs):
         return wrapper(context_getter, func, *args, **kwargs)
 
+    if iscoroutinefunction(func):
+        wrapped._is_coroutine = _is_coroutine
     return wrapped
 
 

@@ -1,16 +1,16 @@
 import collections.abc as collections
-from inspect import Parameter
 import typing
+from inspect import Parameter
 
 import fastapi as _fastapi
 
 from context_handler import _datastructures
 from context_handler.generic import (
-    _GenericContextFactory,
-    _GenericAsyncContextFactory,
     AsyncProviderT,
     ClientT,
     ProviderT,
+    _GenericAsyncContextFactory,
+    _GenericContextFactory,
 )
 from context_handler.getters import generate_state_name
 

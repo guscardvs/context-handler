@@ -1,8 +1,7 @@
-from inspect import Parameter, Signature, signature
 import typing
+from inspect import Parameter, Signature
 
 from context_handler import _datastructures, ensure_context, getters
-from context_handler.context import AsyncContext, SyncContext
 
 GenericContextFactoryT = typing.TypeVar(
     "GenericContextFactoryT", bound="_GenericContextFactory"
@@ -98,5 +97,5 @@ class AsyncGenericFactory(
     _GenericAsyncContextFactory,
     typing.Generic[AsyncProviderT, ClientT],
 ):
-    def get(self) ->  _datastructures.AbstractAsyncContext[ClientT]:
+    def get(self) -> _datastructures.AbstractAsyncContext[ClientT]:
         return super().get()

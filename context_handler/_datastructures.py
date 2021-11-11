@@ -1,7 +1,6 @@
 import enum
 import typing
 
-
 T = typing.TypeVar("T")
 
 
