@@ -124,7 +124,7 @@ class AbstractSyncContext(typing.Protocol[T]):
 
 @typing.runtime_checkable
 class AbstractAsyncContext(typing.Protocol[T]):
-    _provider: "ImmutableWrapper[ImmutableAsyncProvider[T]]"
+    provider: "ImmutableWrapper[ImmutableAsyncProvider[T]]"
     _inside_ctx: bool
 
     def __init__(self, provider: AsyncProvider[T]) -> None:
