@@ -129,7 +129,7 @@ class FAGenericFactory(
         return super().get()
 
 
-class FAAsyncGenericFactoryy(
+class FAAsyncGenericFactory(
     _FastapiAsyncGenericFactory, typing.Generic[AsyncProviderT, ClientT]
 ):
     def get(self) -> _datastructures.AbstractAsyncContext[ClientT]:

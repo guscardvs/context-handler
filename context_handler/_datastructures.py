@@ -99,7 +99,7 @@ class ImmutableAsyncProvider(typing.Generic[T]):
 
 @typing.runtime_checkable
 class AbstractSyncContext(typing.Protocol[T]):
-    _provider: ImmutableSyncProvider[T]
+    provider: "ImmutableWrapper[ImmutableSyncProvider[T]]"
     _inside_ctx: bool
 
     def __init__(self, provider: Provider[T]) -> None:
@@ -124,7 +124,7 @@ class AbstractSyncContext(typing.Protocol[T]):
 
 @typing.runtime_checkable
 class AbstractAsyncContext(typing.Protocol[T]):
-    _provider: ImmutableAsyncProvider[T]
+    _provider: "ImmutableWrapper[ImmutableAsyncProvider[T]]"
     _inside_ctx: bool
 
     def __init__(self, provider: AsyncProvider[T]) -> None:
@@ -367,4 +367,6 @@ class ImmutableWrapper(typing.Generic[ImmutableProviderT]):
     def __get__(self, instance, owner=None) -> ImmutableProviderT:
         if instance is not None:
             return self.immutable_provider(getattr(instance, self.name))
-        raise AttributeError(f"{self.name!r} object has no attribute {owner.__name__!r}")
+        raise AttributeError(
+            f"{self.name!r} object has no attribute {owner.__name__!r}"
+        )
