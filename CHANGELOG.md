@@ -1,4 +1,26 @@
-## 1.3.0 (2021-11-02)
+## 2.1.0 (2021-11-25)
+
+### Feat
+
+- **ensure_context**: added helper methods (instance, view and context)
+
+## 2.0.2 (2021-11-11)
+
+### Fix
+
+- **ensure_context**: added is_coroutine flag to decorator to correctly describe coroutines at introspection
+
+## 2.0.1 (2021-11-11)
+
+### Fix
+
+- **datastructures**: fixed provider type on abstract async context
+
+## 2.0.0 (2021-11-11)
+
+### Fix
+
+- **_datastructures**: changed provider type from async and sync contexts in abstract
 
 ### Feat
 
@@ -10,7 +32,7 @@
 
 - **git**: missing generic files
 
-## 1.2.0 (2021-10-31)
+## 1.2.0 (2021-10-30)
 
 ### Feat
 
