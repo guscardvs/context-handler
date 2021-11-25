@@ -10,24 +10,19 @@ async_factory = context_factory(provider.MockAsyncProvider, AsyncContext)
 
 
 class MockInstanceMethod(instance.MockInstance):
-    @ensure_context.sync_context(
-        first_arg_type="instance", context_attr_name="context"
-    )
+    @ensure_context.sync_context.instance(field="context")
     def instance_func(self):
         provider = self.context.get_provider()
         assert not provider.is_closed(self.context.client)
 
-    @ensure_context.async_context(
-        first_arg_type="instance", context_attr_name="context"
-    )
+    @ensure_context.async_context.instance(field="context")
     async def async_instance_func(self):
         provider = self.context.get_provider()
         assert not provider.is_closed(self.context.client)
 
 
-@ensure_context.sync_context(
-    first_arg_type="view",
-    _factory=sync_factory,
+@ensure_context.sync_context.view(
+    factory=sync_factory,
 )
 def view_func(request: has_state.HasState):
     context = sync_factory(request)
@@ -62,9 +57,8 @@ async def asyncgen_context_func(
     assert not provider.is_closed(context.client)
 
 
-@ensure_context.async_context(
-    first_arg_type="view",
-    _factory=async_factory,
+@ensure_context.async_context.view(
+    factory=async_factory,
 )
 async def async_view_func(request: has_state.HasState):
     context = async_factory(request)
@@ -126,7 +120,7 @@ async def test_ensure_context_async(async_state: has_state.HasState):
             await err_async_context_func(context)
         with pytest.raises(TypeError):
 
-            @ensure_context.async_context
+            @ensure_context._async_context
             def async_context_invalid_func(
                 context: AbstractAsyncContext[client.MockClient],
             ):

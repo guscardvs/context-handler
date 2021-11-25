@@ -99,44 +99,7 @@ def _get_async_wrapper(func):
     return inner
 
 
-@typing.overload
-def sync_context(
-    *,
-    first_arg_type: typing.Literal["instance"],
-    context_attr_name: str,
-) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
-    ...
-
-
-@typing.overload
-def sync_context(
-    *,
-    first_arg_type: typing.Literal["view"],
-    _factory: typing.Union[
-        _datastructures.AbstractAsyncContextFactory,
-        _datastructures.AbstractSyncContextFactory,
-    ],
-) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
-    ...
-
-
-@typing.overload
-def sync_context(
-    *,
-    first_arg_type: typing.Literal["context"],
-) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
-    ...
-
-
-@typing.overload
-def sync_context(
-    func: typing.Callable[P, T],
-    /,
-) -> typing.Callable[P, T]:
-    ...
-
-
-def sync_context(
+def _sync_context(
     func: typing.Callable[P, T] = None,
     /,
     *,
@@ -163,44 +126,7 @@ def sync_context(
     return outer
 
 
-@typing.overload
-def async_context(
-    *,
-    first_arg_type: typing.Literal["instance"],
-    context_attr_name: str,
-) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
-    ...
-
-
-@typing.overload
-def async_context(
-    *,
-    first_arg_type: typing.Literal["view"],
-    _factory: typing.Union[
-        _datastructures.AbstractAsyncContextFactory,
-        _datastructures.AbstractSyncContextFactory,
-    ],
-) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
-    ...
-
-
-@typing.overload
-def async_context(
-    *,
-    first_arg_type: typing.Literal["context"],
-) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
-    ...
-
-
-@typing.overload
-def async_context(
-    func: typing.Callable[P, T],
-    /,
-) -> typing.Callable[P, T]:
-    ...
-
-
-def async_context(
+def _async_context(
     func: typing.Callable[P, T] = None,
     /,
     *,
@@ -277,5 +203,145 @@ def _is_valid_sync_provider(provider_class):
     )
     return is_valid_provider and methods_have_valid_types
 
+
+class _EnsureAsyncContext:
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal["instance"],
+        context_attr_name: str,
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal["view"],
+        _factory: _datastructures.AbstractAsyncContextFactory,
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal["context"],
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        func: typing.Callable[P, T],
+        /,
+    ) -> typing.Callable[P, T]:
+        ...
+
+    def __call__(
+        self,
+        func: typing.Callable[P, T] = None,
+        /,
+        *,
+        first_arg_type: typing.Union[
+            typing.Literal["instance"],
+            typing.Literal["view"],
+            typing.Literal["context"],
+        ] = "context",
+        **kwargs,
+    ):
+        wrapper = _async_context(first_arg_type=first_arg_type, **kwargs)
+        if func is not None:
+            return wrapper(func)
+        return wrapper
+
+    def instance(self, field: str):
+        return self.__call__(
+            first_arg_type="instance", context_attr_name=field
+        )
+
+    def view(
+        self,
+        factory: _datastructures.AbstractAsyncContextFactory,
+    ):
+        return self.__call__(first_arg_type="view", _factory=factory)
+
+    def context(self):
+        return self.__call__(first_arg_type="context")
+
+
+class _EnsureSyncContext:
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal["instance"],
+        context_attr_name: str,
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal["view"],
+        _factory: _datastructures.AbstractSyncContextFactory,
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal["context"],
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        func: typing.Callable[P, T],
+        /,
+    ) -> typing.Callable[P, T]:
+        ...
+
+    def __call__(
+        self,
+        func: typing.Callable[P, T] = None,
+        /,
+        *,
+        first_arg_type: typing.Union[
+            typing.Literal["instance"],
+            typing.Literal["view"],
+            typing.Literal["context"],
+        ] = "context",
+        **kwargs,
+    ) -> typing.Union[
+        typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]],
+        typing.Callable[P, T],
+    ]:
+        wrapper = _sync_context(first_arg_type=first_arg_type, **kwargs)
+        if func is not None:
+            return wrapper(func)
+        return wrapper
+
+    def instance(self, field: str):
+        return self.__call__(
+            first_arg_type="instance", context_attr_name=field
+        )
+
+    def view(
+        self,
+        factory: _datastructures.AbstractSyncContextFactory,
+    ):
+        return self.__call__(first_arg_type="view", _factory=factory)
+
+    def context(self):
+        return self.__call__(first_arg_type="context")
+
+
+sync_context = _EnsureSyncContext()
+async_context = _EnsureAsyncContext()
 
 __all__ = ["sync_context", "async_context"]

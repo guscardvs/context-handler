@@ -14,28 +14,30 @@ from sqlalchemy.engine import Connection
 
 class ConnectionProvider:
     """ConnectionProvider must follow Provider Protocol from ._datastructures.Provider"""
-
+    
     state_name = "connection_provider"
-
+    
     def __init__(self):
         self.engine = create_engine("sqlite://:memory:")
-
+    
     @contextmanager
     def acquire(self):
         with self.engine.connect() as conn:
             with conn.begin():
                 yield conn
-
+    
     def is_closed(self, conn: Connection):
         return conn.closed
-
+    
     def close_client(self, conn: Connection):
         conn.close()
 
-@ensure_context.sync_context # Utility to open context automatically before calling function
+
+@ensure_context._sync_context  # Utility to open context automatically before calling function
 def make_some_query(context: SyncContext[Connection]):
     with context.begin() as client:
         client.execute(sql_stmt)
+
 
 context = SyncContext[Connection](ConnectionProvider())
 with context.open():
@@ -57,21 +59,22 @@ import asyncio
 
 class ClientSessionProvider:
     """ClientSessionProvider must follow AsyncProvider Protocol from ._datastructures.AsyncProvider"""
-
+    
     state_name = "client_session_provider"
-
+    
     @asynccontextmanager
     async def acquire(self):
         async with aiohttp.ClientSession() as session:
             yield session
-
+    
     def is_closed(self, client: aiohttp.ClientSession):
         return client.closed
-
+    
     async def close_client(self, client: aiohttp.ClientSession):
         await client.close()
 
-@ensure_context.async_context # Utility to open context automatically before calling awaitable function
+
+@ensure_context._async_context  # Utility to open context automatically before calling awaitable function
 async def run_some_request(context: AsyncContext[aiohttp.ClientSession]):
     with context.begin() as client:
         async with client.get(some_route) as response:
@@ -84,8 +87,8 @@ async def run():
         async with context.begin() as client:  # client here is an aiohttp.ClientSession instance
             async with client.get(some_route) as response:
                 ...
-        await asyncio.gather( run_some_request(context),  run_some_request(context),  run_some_request(context), )  # client inside these functions is the same instance from the last .begin() call
-
+        await asyncio.gather(run_some_request(context), run_some_request(context), run_some_request(
+            context), )  # client inside these functions is the same instance from the last .begin() call
 
 
 asyncio.run(run())

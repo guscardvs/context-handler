@@ -11,10 +11,10 @@ consuming the context from the parameters
 from context_handler import ensure_context
 
 
-@ensure_context.sync_context
+@ensure_context._sync_context
 def make_some_query(context: SyncContext[Connection]):
-    with context.begin() as client:
-        client.execute(sql_stmt)
+  with context.begin() as client:
+    client.execute(sql_stmt)
 ```
 
 ### Instance
@@ -24,16 +24,16 @@ from context_handler import ensure_context
 
 
 class MyClass:
-    def __init__(self, context: SyncContext):
-        self._context = context
+  def __init__(self, context: SyncContext):
+    self._context = context
 
-    @ensure_context.sync_context(
-        first_arg_type="instance",
-        context_attr_name="_context",
-    )
-    def make_some_query(self):
-        with self._context.begin() as client:
-            client.execute(sql_stmt)
+  @ensure_context._sync_context(
+    first_arg_type="instance",
+    context_attr_name="_context",
+  )
+  def make_some_query(self):
+    with self._context.begin() as client:
+      client.execute(sql_stmt)
 ```
 
 ### View
@@ -41,16 +41,16 @@ class MyClass:
 ```Python
 from context_handler import ensure_context, context_factory
 
-
 factory = context_factory(provider.MyProvider, SyncContext)
 
-@ensure_context.sync_context(
-    first_arg_type="view",
-    _factory=factory
+
+@ensure_context._sync_context(
+  first_arg_type="view",
+  _factory=factory
 )
 async def my_route(request: Request):
-    with factory(request).begin() as client:
-        client.execute(sql_stmt)
+  with factory(request).begin() as client:
+    client.execute(sql_stmt)
 
 ```
 
