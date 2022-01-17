@@ -33,7 +33,7 @@ class ConnectionProvider:
         conn.close()
 
 
-@ensure_context._sync_context  # Utility to open context automatically before calling function
+@ensure_context.sync_context  # Utility to open context automatically before calling function
 def make_some_query(context: SyncContext[Connection]):
     with context.begin() as client:
         client.execute(sql_stmt)
@@ -74,7 +74,7 @@ class ClientSessionProvider:
         await client.close()
 
 
-@ensure_context._async_context  # Utility to open context automatically before calling awaitable function
+@ensure_context.async_context # Utility to open context automatically before calling awaitable function
 async def run_some_request(context: AsyncContext[aiohttp.ClientSession]):
     with context.begin() as client:
         async with client.get(some_route) as response:
