@@ -1,7 +1,8 @@
-## 2.1.0 (2021-11-25)
+## 4.0.0 (2022-01-22)
 
 ### Feat
 
+- **ensure_context**: created helper function to reduce verbosity
 - **ensure_context**: added helper methods (instance, view and context)
 
 ## 2.0.2 (2021-11-11)

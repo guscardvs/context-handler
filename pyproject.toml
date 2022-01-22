@@ -1,6 +1,6 @@
 [project]
 name = "context-handler"
-version = "2.1.0"
+version = "4.0.0"
 description = ""
 authors = [{ name = "Gustavo Correa", email = "self.gustavocorrea@gmail.com" }]
 dependencies = ["typing-extensions<4.0.0,>=3.10.0"]
@@ -38,7 +38,7 @@ test = 'pytest --verbose -p no:warning --cov=context_handler --cov-report=html -
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "2.1.0"
+version = "4.0.0"
 tag_format = "$version"
 annotated_tag = true
 version_files = [
