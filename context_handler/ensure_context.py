@@ -8,9 +8,9 @@ from typing_extensions import ParamSpec
 
 from . import _datastructures, context
 
-T = typing.TypeVar("T")
-P = ParamSpec("P")
-ClassT = typing.TypeVar("ClassT")
+T = typing.TypeVar('T')
+P = ParamSpec('P')
+ClassT = typing.TypeVar('ClassT')
 
 
 def _open_sync_ctx_in_sync(
@@ -95,7 +95,7 @@ def _get_async_wrapper(func):
     elif isasyncgenfunction(func):
         inner = _open_async_ctx_in_async_gen
     else:
-        raise TypeError("AsyncContext cannot be used in sync function")
+        raise TypeError('AsyncContext cannot be used in sync function')
     return inner
 
 
@@ -104,10 +104,11 @@ def _sync_context(
     /,
     *,
     first_arg_type: typing.Union[
-        typing.Literal["instance"],
-        typing.Literal["view"],
-        typing.Literal["context"],
-    ] = "context",
+        typing.Literal['instance'],
+        typing.Literal['view'],
+        typing.Literal['context'],
+        typing.Literal['get_context'],
+    ] = 'context',
     **kwargs,
 ) -> typing.Union[
     typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]],
@@ -131,10 +132,11 @@ def _async_context(
     /,
     *,
     first_arg_type: typing.Union[
-        typing.Literal["instance"],
-        typing.Literal["view"],
-        typing.Literal["context"],
-    ] = "context",
+        typing.Literal['instance'],
+        typing.Literal['view'],
+        typing.Literal['context'],
+        typing.Literal['get_context'],
+    ] = 'context',
     **kwargs,
 ) -> typing.Union[
     typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]],
@@ -163,14 +165,14 @@ def _guess_context_class(
     elif _is_valid_sync_provider(provider_class):
         return context.SyncContext
     raise TypeError(
-        "provider_class must implement either _datastructures.Provider or _datastructures.AsyncProvider protocol"
+        'provider_class must implement either _datastructures.Provider or _datastructures.AsyncProvider protocol'
     )
 
 
 def _is_valid_provider(provider_class):
     has_methods = all(
         hasattr(provider_class, item)
-        for item in ["state_name", "is_closed", "close_client", "acquire"]
+        for item in ['state_name', 'is_closed', 'close_client', 'acquire']
     )
     methods_are_valid = isinstance(
         provider_class.state_name, str
@@ -184,8 +186,8 @@ def _is_valid_async_provider(provider_class):
         provider_class.close_client
     ) and (
         (
-            hasattr(provider_class.acquire, "__aenter__")
-            and hasattr(provider_class.acquire, "__aexit__")
+            hasattr(provider_class.acquire, '__aenter__')
+            and hasattr(provider_class.acquire, '__aexit__')
         )
         or isasyncgenfunction(provider_class.acquire.__wrapped__)
     )
@@ -196,8 +198,8 @@ def _is_valid_sync_provider(provider_class):
     is_valid_provider = _is_valid_provider(provider_class)
     methods_have_valid_types = callable(provider_class.close_client) and (
         (
-            hasattr(provider_class.acquire, "__enter__")
-            and hasattr(provider_class.acquire, "__exit__")
+            hasattr(provider_class.acquire, '__enter__')
+            and hasattr(provider_class.acquire, '__exit__')
         )
         or isgeneratorfunction(provider_class.acquire.__wrapped__)
     )
@@ -209,7 +211,7 @@ class _EnsureAsyncContext:
     def __call__(
         self,
         *,
-        first_arg_type: typing.Literal["instance"],
+        first_arg_type: typing.Literal['instance'],
         context_attr_name: str,
     ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
         ...
@@ -218,7 +220,7 @@ class _EnsureAsyncContext:
     def __call__(
         self,
         *,
-        first_arg_type: typing.Literal["view"],
+        first_arg_type: typing.Literal['view'],
         _factory: _datastructures.AbstractAsyncContextFactory,
     ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
         ...
@@ -227,7 +229,15 @@ class _EnsureAsyncContext:
     def __call__(
         self,
         *,
-        first_arg_type: typing.Literal["context"],
+        first_arg_type: typing.Literal['context'],
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal['get_context'],
     ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
         ...
 
@@ -245,30 +255,32 @@ class _EnsureAsyncContext:
         /,
         *,
         first_arg_type: typing.Union[
-            typing.Literal["instance"],
-            typing.Literal["view"],
-            typing.Literal["context"],
-        ] = "context",
+            typing.Literal['instance'],
+            typing.Literal['view'],
+            typing.Literal['context'],
+            typing.Literal['get_context'],
+        ] = 'context',
         **kwargs,
-    ):
+    ) -> typing.Callable[P, T]:
         wrapper = _async_context(first_arg_type=first_arg_type, **kwargs)
         if func is not None:
             return wrapper(func)
         return wrapper
 
     def instance(self, field: str):
-        return self.__call__(
-            first_arg_type="instance", context_attr_name=field
-        )
+        return self(first_arg_type='instance', context_attr_name=field)
 
     def view(
         self,
         factory: _datastructures.AbstractAsyncContextFactory,
     ):
-        return self.__call__(first_arg_type="view", _factory=factory)
+        return self(first_arg_type='view', _factory=factory)
 
     def context(self):
-        return self.__call__(first_arg_type="context")
+        return self(first_arg_type='context')
+
+    def context_class(self):
+        return self(first_arg_type='get_context')
 
 
 class _EnsureSyncContext:
@@ -276,7 +288,7 @@ class _EnsureSyncContext:
     def __call__(
         self,
         *,
-        first_arg_type: typing.Literal["instance"],
+        first_arg_type: typing.Literal['instance'],
         context_attr_name: str,
     ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
         ...
@@ -285,7 +297,7 @@ class _EnsureSyncContext:
     def __call__(
         self,
         *,
-        first_arg_type: typing.Literal["view"],
+        first_arg_type: typing.Literal['view'],
         _factory: _datastructures.AbstractSyncContextFactory,
     ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
         ...
@@ -294,7 +306,15 @@ class _EnsureSyncContext:
     def __call__(
         self,
         *,
-        first_arg_type: typing.Literal["context"],
+        first_arg_type: typing.Literal['context'],
+    ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
+        ...
+
+    @typing.overload
+    def __call__(
+        self,
+        *,
+        first_arg_type: typing.Literal['get_context'],
     ) -> typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]]:
         ...
 
@@ -312,10 +332,11 @@ class _EnsureSyncContext:
         /,
         *,
         first_arg_type: typing.Union[
-            typing.Literal["instance"],
-            typing.Literal["view"],
-            typing.Literal["context"],
-        ] = "context",
+            typing.Literal['instance'],
+            typing.Literal['view'],
+            typing.Literal['context'],
+            typing.Literal['get_context'],
+        ] = 'context',
         **kwargs,
     ) -> typing.Union[
         typing.Callable[[typing.Callable[P, T]], typing.Callable[P, T]],
@@ -327,21 +348,25 @@ class _EnsureSyncContext:
         return wrapper
 
     def instance(self, field: str):
-        return self.__call__(
-            first_arg_type="instance", context_attr_name=field
-        )
+        return self(first_arg_type='instance', context_attr_name=field)
 
     def view(
         self,
         factory: _datastructures.AbstractSyncContextFactory,
     ):
-        return self.__call__(first_arg_type="view", _factory=factory)
+        return self(first_arg_type='view', _factory=factory)
 
     def context(self):
-        return self.__call__(first_arg_type="context")
+        return self(first_arg_type='context')
+
+    def context_class(self):
+        return self(first_arg_type='get_context')
 
 
 sync_context = _EnsureSyncContext()
 async_context = _EnsureAsyncContext()
 
-__all__ = ["sync_context", "async_context"]
+method = sync_context.context_class()
+async_method = async_context.context_class()
+
+__all__ = ['sync_context', 'async_context', 'async_method', 'method']

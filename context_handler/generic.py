@@ -4,15 +4,15 @@ from inspect import Parameter, Signature
 from context_handler import _datastructures, ensure_context, getters
 
 GenericContextFactoryT = typing.TypeVar(
-    "GenericContextFactoryT", bound="_GenericContextFactory"
+    'GenericContextFactoryT', bound='_GenericContextFactory'
 )
 AsyncGenericContextFactoryT = typing.TypeVar(
-    "AsyncGenericContextFactoryT", bound="_GenericAsyncContextFactory"
+    'AsyncGenericContextFactoryT', bound='_GenericAsyncContextFactory'
 )
-ClientT = typing.TypeVar("ClientT")
-ProviderT = typing.TypeVar("ProviderT", bound=_datastructures.Provider)
+ClientT = typing.TypeVar('ClientT')
+ProviderT = typing.TypeVar('ProviderT', bound=_datastructures.Provider)
 AsyncProviderT = typing.TypeVar(
-    "AsyncProviderT", bound=_datastructures.AsyncProvider
+    'AsyncProviderT', bound=_datastructures.AsyncProvider
 )
 
 
@@ -22,7 +22,7 @@ class _GenericContextFactory:
     @classmethod
     def _get_param(cls):
         return Parameter(
-            "has_state",
+            'has_state',
             Parameter.KEYWORD_ONLY,
             annotation=_datastructures.HasState,
         )
@@ -38,10 +38,10 @@ class _GenericContextFactory:
         provider_class = params[0]
         context_class = ensure_context._guess_context_class(provider_class)
         namespace: dict[str, typing.Any] = {
-            "__module__": cls.__module__,
-            "_factory": getters.context_factory(provider_class, context_class),
+            '__module__': cls.__module__,
+            '_factory': getters.context_factory(provider_class, context_class),
         }
-        new_t = type("{}[{}]".format(cls.__name__, ",".join(param.__name__ for param in params)), (cls,), namespace)  # type: ignore
+        new_t = type('{}[{}]'.format(cls.__name__, ','.join(param.__name__ for param in params)), (cls,), namespace)  # type: ignore
         new_t.__signature__ = Signature(parameters=[cls._get_param()])
         return new_t  # type: ignore
 
@@ -58,7 +58,7 @@ class _GenericAsyncContextFactory:
     @classmethod
     def _get_param(cls):
         return Parameter(
-            "has_state",
+            'has_state',
             Parameter.KEYWORD_ONLY,
             annotation=_datastructures.HasState,
         )
@@ -72,10 +72,10 @@ class _GenericAsyncContextFactory:
         provider_class = params[0]
         context_class = ensure_context._guess_context_class(provider_class)
         namespace: dict[str, typing.Any] = {
-            "__module__": cls.__module__,
-            "_factory": getters.context_factory(provider_class, context_class),
+            '__module__': cls.__module__,
+            '_factory': getters.context_factory(provider_class, context_class),
         }
-        new_t = type("{}[{}]".format(cls.__name__, ",".join(param.__name__ for param in params)), (cls,), namespace)  # type: ignore
+        new_t = type('{}[{}]'.format(cls.__name__, ','.join(param.__name__ for param in params)), (cls,), namespace)  # type: ignore
         new_t.__signature__ = Signature(parameters=[cls._get_param()])
         return new_t  # type: ignore
 

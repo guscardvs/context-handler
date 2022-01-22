@@ -4,7 +4,7 @@ from context_handler import context
 
 from . import _datastructures, factory
 
-T = typing.TypeVar("T")
+T = typing.TypeVar('T')
 
 
 @typing.overload
@@ -91,7 +91,7 @@ def get_context(
         return context.AsyncContext(provider)
     elif isinstance(provider, context.SyncContext):
         return context.SyncContext(provider)
-    raise TypeError("Invalid provider")
+    raise TypeError('Invalid provider')
 
 
 ArgType = _datastructures.ContextGetter.ArgType

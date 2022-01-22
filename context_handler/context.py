@@ -3,12 +3,12 @@ from contextlib import asynccontextmanager, contextmanager
 
 from context_handler import _datastructures, exc
 
-T = typing.TypeVar("T")
+T = typing.TypeVar('T')
 
 
 class SyncContext(typing.Generic[T]):
     provider = _datastructures.ImmutableWrapper(
-        "_provider", _datastructures.ImmutableSyncProvider[T]
+        '_provider', _datastructures.ImmutableSyncProvider[T]
     )
 
     def __init__(self, provider: _datastructures.Provider[T]) -> None:
@@ -85,7 +85,7 @@ class SyncContext(typing.Generic[T]):
 
 class AsyncContext(typing.Generic[T]):
     provider = _datastructures.ImmutableWrapper(
-        "_provider", _datastructures.ImmutableAsyncProvider[T]
+        '_provider', _datastructures.ImmutableAsyncProvider[T]
     )
 
     def __init__(self, provider: _datastructures.AsyncProvider[T]) -> None:

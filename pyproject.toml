@@ -1,34 +1,40 @@
-[tool.poetry]
+[project]
 name = "context-handler"
 version = "2.1.0"
 description = ""
-authors = ["Gustavo Correa <self.gustavocorrea@gmail.com>"]
+authors = [{ name = "Gustavo Correa", email = "self.gustavocorrea@gmail.com" }]
+dependencies = ["typing-extensions<4.0.0,>=3.10.0"]
+requires-python = ">=3.8,<4.0"
+license = { text = "MIT" }
 
-[tool.poetry.dependencies]
-python = ">=3.8,<4.0"
-typing-extensions = "^3.10.0"
-fastapi = {version = "^0.70.0", optional = true}
-sanic = {version = "^21.9.1", optional = true}
+[project.urls]
+homepage = ""
 
-[tool.poetry.dev-dependencies]
-black = "^21.9b0"
-pytest = "^6.2.5"
-pytest-cov = "^3.0.0"
-pytest-asyncio = "^0.16.0"
-autoflake = "^1.4"
-isort = "^5.9.3"
-pylint = "^2.11.1"
-bandit = "^1.7.0"
+[project.optional-dependencies]
+fastapi = ["fastapi<1.0.0,>=0.72.0"]
+sanic = ["sanic<22.0.0,>=21.9.1"]
+[tool]
+[tool.pdm]
+includes = []
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest<7.0.0,>=6.2.5",
+    "pytest-cov<4.0.0,>=3.0.0",
+    "pytest-asyncio<1.0.0,>=0.16.0",
+    "autoflake<2.0,>=1.4",
+    "isort<6.0.0,>=5.9.3",
+    "pylint<3.0.0,>=2.11.1",
+    "bandit<2.0.0,>=1.7.0"]
+publish = [
+    "pdm-publish>=0.2.1",
+]
+style = [
+    "blue>=0.7.0",
+]
 
-[tool.poetry.extras]
-fastapi = ["fastapi"]
-sanic = ["sanic"]
-
-[tool.black]
-line_length = 79
-
-[tool.isort]
-profile = "black"
+[tool.pdm.scripts]
+format = {shell = 'blue .\context_handler && isort .\context_handler && autoflake --remove-all-unused-imports --remove-unused-variables --remove-duplicate-keys --expand-star-imports -ir context_handler'}
+test = 'pytest --verbose -p no:warning --cov=context_handler --cov-report=html --cov-report=xml:.artifacts/coverage.xml --junit-xml=.artifacts/tests.xml --cov-config=.coveragerc ./tests'
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -40,6 +46,7 @@ version_files = [
     "context_handler/__init__.py"
 ]
 
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"

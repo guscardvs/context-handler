@@ -2,7 +2,7 @@ import typing
 
 from context_handler import _datastructures, exc
 
-T = typing.TypeVar("T")
+T = typing.TypeVar('T')
 
 
 class _ContextFactory(typing.Generic[T]):
@@ -31,7 +31,7 @@ class _ContextFactory(typing.Generic[T]):
             typing.Type[_datastructures.Provider[T]],
         ]
     ):
-        return provider_class.state_name.lower().replace("provider", "context")
+        return provider_class.state_name.lower().replace('provider', 'context')
 
     def has_active_context(self, has_state: _datastructures.HasState):
         return bool(
@@ -56,7 +56,7 @@ class _ContextFactory(typing.Generic[T]):
             provider, (_datastructures.AsyncProvider, _datastructures.Provider)
         ):
             raise exc.NoProviderInState(
-                "State Handler does not have provider instantiated"
+                'State Handler does not have provider instantiated'
             )
         return self._context_class(provider)  # type: ignore
 

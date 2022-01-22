@@ -1,6 +1,6 @@
 import pytest
 
-from context_handler import context_factory, ensure_context, exc
+from context_handler import context_factory, ensure_context, exc, context_class
 from context_handler._datastructures import AbstractAsyncContext, AbstractSyncContext
 from context_handler.context import AsyncContext, SyncContext
 from tests.mocks import client, has_state, instance, provider
@@ -8,14 +8,14 @@ from tests.mocks import client, has_state, instance, provider
 sync_factory = context_factory(provider.MockProvider, SyncContext)
 async_factory = context_factory(provider.MockAsyncProvider, AsyncContext)
 
-
+@context_class
 class MockInstanceMethod(instance.MockInstance):
-    @ensure_context.sync_context.instance(field="context")
+    @ensure_context.method
     def instance_func(self):
         provider = self.context.get_provider()
         assert not provider.is_closed(self.context.client)
 
-    @ensure_context.async_context.instance(field="context")
+    @ensure_context.async_method
     async def async_instance_func(self):
         provider = self.context.get_provider()
         assert not provider.is_closed(self.context.client)
