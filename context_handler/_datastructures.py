@@ -218,10 +218,9 @@ class StateWrapper:
         for item in self._valid_state_attrs:
             if hasattr(instance, item):
                 return item
-        else:
-            raise NotImplementedError(
-                'State Handler does not have supported state_attrs'
-            )
+        raise NotImplementedError(
+            'State Handler does not have supported state_attrs'
+        )
 
     @property
     def _app_state(self):
