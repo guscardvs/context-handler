@@ -28,9 +28,8 @@ def setup_context_cleaner_middleware(app: _fastapi.FastAPI):
         contexts_from_provider = _get_contexts_from_providers(
             provider_list, request_state_dict
         )
-        contexts_by_type = _get_contexts_by_type(request_state_dict)
         await _close_active_contexts(
-            frozenset(contexts_from_provider + contexts_by_type)
+            contexts_from_provider
         )
         return response
 
@@ -68,7 +67,7 @@ def _get_contexts_from_providers(
             ) is not None:
                 yield context
 
-    return list(_gen())
+    return frozenset(_gen())
 
 
 def _get_contexts_by_type(request_state_dict: typing.Dict[str, typing.Any]):

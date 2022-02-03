@@ -7,9 +7,6 @@ dependencies = ["typing-extensions<4.0.0,>=3.10.0"]
 requires-python = ">=3.8,<4.0"
 license = { text = "MIT" }
 
-[project.urls]
-homepage = ""
-
 [project.optional-dependencies]
 fastapi = ["fastapi<1.0.0,>=0.72.0"]
 sanic = ["sanic<22.0.0,>=21.9.1"]
@@ -25,7 +22,9 @@ dev = [
     "isort<6.0.0,>=5.9.3",
     "pylint<3.0.0,>=2.11.1",
     "bandit<2.0.0,>=1.7.0"]
-publish = []
+publish = [
+    "twine>=3.7.1",
+]
 style = [
     "blue>=0.7.0",
 ]
