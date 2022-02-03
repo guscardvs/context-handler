@@ -1,3 +1,9 @@
+## 4.0.1 (2022-02-03)
+
+### Fix
+
+- **fastapi**: removed middleware from using isinstance with protocol
+
 ## 4.0.0 (2022-01-22)
 
 ### Feat
