@@ -21,7 +21,9 @@ dev = [
     "autoflake<2.0,>=1.4",
     "isort<6.0.0,>=5.9.3",
     "pylint<3.0.0,>=2.11.1",
-    "bandit<2.0.0,>=1.7.0"]
+    "bandit<2.0.0,>=1.7.0",
+    "editables~=0.2",
+]
 publish = [
     "twine>=3.7.1",
 ]

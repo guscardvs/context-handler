@@ -4,7 +4,10 @@ from asyncio.coroutines import _is_coroutine  # noqa
 from functools import wraps
 from inspect import isasyncgenfunction, isgeneratorfunction
 
-from typing_extensions import ParamSpec
+try:
+    from typing import ParamSpec
+except ImportError:
+    from typing_extensions import ParamSpec
 
 from . import _datastructures, context
 
