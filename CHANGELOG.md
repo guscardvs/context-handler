@@ -1,3 +1,9 @@
+## 4.0.2 (2022-02-07)
+
+### Fix
+
+- **ensure_context**: uses typing instead of typing extensions if pyversion > 3.9
+
 ## 4.0.1 (2022-02-03)
 
 ### Fix
