@@ -75,9 +75,7 @@ class SyncContext(typing.Generic[T]):
 
     @contextmanager
     def open(self):
-        if self.in_context():
-            return self._contexted_open()
-        return self._open_context()
+        return self._contexted_open() if self.in_context() else self._open_context()
 
     def get_provider(self) -> _datastructures.ImmutableSyncProvider[T]:
         return self.provider
@@ -152,9 +150,7 @@ class AsyncContext(typing.Generic[T]):
 
     @asynccontextmanager
     def open(self):
-        if self.in_context():
-            return self._contexted_open()
-        return self._open_context()
+        return self._contexted_open() if self.in_context() else self._open_context()
 
     def get_provider(self) -> _datastructures.ImmutableAsyncProvider[T]:
         return self.provider
