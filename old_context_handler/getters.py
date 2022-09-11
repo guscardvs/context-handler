@@ -2,7 +2,8 @@ import typing
 
 from context_handler import context
 
-from . import _datastructures, factory
+from . import _datastructures
+from . import factory
 
 T = typing.TypeVar('T')
 

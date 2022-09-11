@@ -1,156 +1,91 @@
-import typing
-from contextlib import asynccontextmanager, contextmanager
+import contextlib
 
-from context_handler import _datastructures, exc
+from context_handler import interfaces
+from context_handler.typedef import AsyncT
+from context_handler.typedef import T
+from context_handler.utils import lazy
 
-T = typing.TypeVar('T')
 
+class Context(interfaces.Handler[T]):
+    def __init__(self, adapter: interfaces.Adapter[T]) -> None:
+        self._adapter = adapter
+        self._stack = 0
 
-class SyncContext(typing.Generic[T]):
-    provider = _datastructures.ImmutableWrapper(
-        '_provider', _datastructures.ImmutableSyncProvider[T]
-    )
-
-    def __init__(self, provider: _datastructures.Provider[T]) -> None:
-        self._provider = provider
-        self._inside_ctx = False
-        self._client: typing.Optional[T] = None
-
-    def in_context(self):
-        if self._client is None:
-            return False
-        return not self.provider.is_closed(self._client)
+    @lazy.lazy_property
+    def client(self) -> T:
+        return self.adapter.new()
 
     @property
-    def client(self) -> T:
-        if self._client is None:
-            raise exc.ContextNotInitializedError
-        return self._client
+    def adapter(self) -> interfaces.Adapter[T]:
+        return self._adapter
 
-    def _set_client(self, client: T):
-        self._client = client
+    def is_active(self) -> bool:
+        return self._stack > 0
 
-    def _reset_context(self):
-        if self._client is None:
-            return
-        if not self.provider.is_closed(self._client):
-            self.provider.close_client(self._client)
-        self._set_client(None)
-        self._inside_ctx = False
+    def acquire(self):
+        if self.adapter.is_closed(self.client):
+            del self.client
+        self._stack += 1
+        return self.client
 
-    def _open_context(self):
-        error = None
-        with self.provider.acquire() as client:
-            self._set_client(client)
-            self._inside_ctx = True
-            try:
-                yield
-            except Exception as err:
-                error = err
-        self._reset_context()
-        if error is not None:
-            raise error
+    def release(self):
+        if self._stack == 1:
+            self.adapter.release(self.client)
+            del self.client
+        self._stack -= 1
 
-    def _begin_context(self):
-        error = None
-        with self.provider.acquire() as client:
-            try:
-                yield client
-            except Exception as err:
-                error = err
-        if error is not None:
-            raise error
-
-    def _contexted_begin(self):
-        yield self.client
-
-    def _contexted_open(self):
-        yield
-
-    @contextmanager
-    def begin(self):
-        if self.in_context():
-            return self._contexted_begin()
-        return self._begin_context()
-
-    @contextmanager
+    @contextlib.contextmanager
     def open(self):
-        return self._contexted_open() if self.in_context() else self._open_context()
+        self.acquire()
+        yield
+        self.release()
 
-    def get_provider(self) -> _datastructures.ImmutableSyncProvider[T]:
-        return self.provider
+    @contextlib.contextmanager
+    def begin(self):
+        yield self.acquire()
+        self.release()
 
 
-class AsyncContext(typing.Generic[T]):
-    provider = _datastructures.ImmutableWrapper(
-        '_provider', _datastructures.ImmutableAsyncProvider[T]
-    )
-
-    def __init__(self, provider: _datastructures.AsyncProvider[T]) -> None:
-        self._provider = provider
-        self._inside_ctx = False
-        self._client: typing.Optional[T] = None
-
-    def in_context(self):
-        if self._client is None:
-            return False
-        return not self.provider.is_closed(self._client)
+class AsyncContext(interfaces.AsyncHandler[AsyncT]):
+    def __init__(self, adapter: interfaces.AsyncAdapter[AsyncT]) -> None:
+        self._adapter = adapter
+        self._stack = 0
+        self._client: AsyncT | None = None
 
     @property
-    def client(self) -> T:
-        if self._client is None:
-            raise exc.ContextNotInitializedError
+    def adapter(self) -> interfaces.AsyncAdapter[AsyncT]:
+        return self._adapter
+
+    def is_active(self) -> bool:
+        return self._stack > 0
+
+    async def client(self) -> AsyncT:
+        if self._client is None or await self._adapter.is_closed(self._client):
+            self._client = await self._adapter.new()
         return self._client
 
-    def _set_client(self, client: T):
-        self._client = client
+    async def acquire(self):
+        client = await self.client()
+        self._stack += 1
+        return client
 
-    async def _reset_context(self):
+    async def release(self):
         if self._client is None:
-            return
-        if not self.provider.is_closed(self._client):
-            await self.provider.close_client(self._client)
-        self._set_client(None)
-        self._inside_ctx = False
+            raise RuntimeError(
+                'Release should not be called before client initialization'
+            )
+        if self._stack == 1:
+            await self.adapter.release(self._client)
+            self._client = None
+        self._stack -= 1
 
-    async def _open_context(self):
-        error = None
-        async with self.provider.acquire() as client:
-            self._set_client(client)
-            self._inside_ctx = True
-            try:
-                yield
-            except Exception as err:
-                error = err
-        await self._reset_context()
-        if error is not None:
-            raise error
-
-    async def _begin_context(self):
-        error = None
-        async with self.provider.acquire() as client:
-            try:
-                yield client
-            except Exception as err:
-                error = err
-        if error is not None:
-            raise error
-
-    async def _contexted_begin(self):
-        yield self.client
-
-    async def _contexted_open(self):
+    @contextlib.asynccontextmanager
+    async def open(self):
+        await self.acquire()
         yield
+        await self.release()
 
-    @asynccontextmanager
-    def begin(self):
-        if self.in_context():
-            return self._contexted_begin()
-        return self._begin_context()
-
-    @asynccontextmanager
-    def open(self):
-        return self._contexted_open() if self.in_context() else self._open_context()
-
-    def get_provider(self) -> _datastructures.ImmutableAsyncProvider[T]:
-        return self.provider
+    @contextlib.asynccontextmanager
+    async def begin(self):
+        yield await self.acquire()
+        await self.release()

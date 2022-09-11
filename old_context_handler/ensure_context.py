@@ -2,14 +2,16 @@ import typing
 from asyncio import iscoroutinefunction
 from asyncio.coroutines import _is_coroutine  # noqa
 from functools import wraps
-from inspect import isasyncgenfunction, isgeneratorfunction
+from inspect import isasyncgenfunction
+from inspect import isgeneratorfunction
 
 try:
     from typing import ParamSpec
 except ImportError:
     from typing_extensions import ParamSpec
 
-from . import _datastructures, context
+from . import _datastructures
+from . import context
 
 T = typing.TypeVar('T')
 P = ParamSpec('P')

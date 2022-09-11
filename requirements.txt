@@ -1,0 +1,11 @@
+autoflake=<2.0,>=1.4
+bandit=<2.0.0,>=1.7.0
+blue=>=0.7.0
+editables=~=0.2
+isort=<6.0.0,>=5.9.3
+pylint=<3.0.0,>=2.11.1
+pytest=<7.0.0,>=6.2.5
+pytest-asyncio=<1.0.0,>=0.16.0
+pytest-cov=<4.0.0,>=3.0.0
+twine=>=3.7.1
+typing-extensions=<4.0.0,>=3.10.0

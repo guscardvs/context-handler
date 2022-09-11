@@ -5,9 +5,11 @@ from inspect import Parameter
 import fastapi as _fastapi
 
 from context_handler import _datastructures
-from context_handler.generic import (AsyncProviderT, ClientT, ProviderT,
-                                     _GenericAsyncContextFactory,
-                                     _GenericContextFactory)
+from context_handler.generic import AsyncProviderT
+from context_handler.generic import ClientT
+from context_handler.generic import ProviderT
+from context_handler.generic import _GenericAsyncContextFactory
+from context_handler.generic import _GenericContextFactory
 from context_handler.getters import generate_state_name
 
 
@@ -28,9 +30,7 @@ def setup_context_cleaner_middleware(app: _fastapi.FastAPI):
         contexts_from_provider = _get_contexts_from_providers(
             provider_list, request_state_dict
         )
-        await _close_active_contexts(
-            contexts_from_provider
-        )
+        await _close_active_contexts(contexts_from_provider)
         return response
 
     app.middleware('http')(_context_cleaner_middleware)

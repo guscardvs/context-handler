@@ -1,6 +1,7 @@
 import typing
 
-from context_handler import _datastructures, exc
+from context_handler import _datastructures
+from context_handler import exc
 
 T = typing.TypeVar('T')
 

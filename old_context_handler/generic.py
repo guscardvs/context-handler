@@ -1,7 +1,10 @@
 import typing
-from inspect import Parameter, Signature
+from inspect import Parameter
+from inspect import Signature
 
-from context_handler import _datastructures, ensure_context, getters
+from context_handler import _datastructures
+from context_handler import ensure_context
+from context_handler import getters
 
 GenericContextFactoryT = typing.TypeVar(
     'GenericContextFactoryT', bound='_GenericContextFactory'
