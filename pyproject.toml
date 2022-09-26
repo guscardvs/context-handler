@@ -25,6 +25,7 @@ aiohttp = "^3.8.1"
 SQLAlchemy = "^1.4.41"
 aiosqlite = "^0.17.0"
 sqlalchemy2-stubs = "^0.0.2-alpha.27"
+coverage = "^6.4.4"
 
 [tool.black]
 line_length = 79

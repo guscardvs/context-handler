@@ -11,9 +11,28 @@ from context_handler.utils import lazy
 
 
 class SaAdapter(interfaces.Adapter[sa_engine.Connection]):
+    @typing.overload
     def __init__(
         self,
-        uri: sa_engine.URL | None = None,
+        *,
+        uri: str,
+        engine: None = None,
+    ) -> None:
+        ...
+
+    @typing.overload
+    def __init__(
+        self,
+        *,
+        uri: None = None,
+        engine: sa_engine.Engine,
+    ) -> None:
+        ...
+
+    def __init__(
+        self,
+        *,
+        uri: str | None = None,
         engine: sa_engine.Engine | None = None,
     ) -> None:
         if not any((uri, engine)):
