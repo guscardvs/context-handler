@@ -8,8 +8,6 @@ from context_handler.utils import lazy
 
 
 class Handler(typing.Protocol[T]):
-    adapter: Adapter[T]
-
     def __init__(self, adapter: Adapter[T]) -> None:
         ...
 
@@ -17,7 +15,11 @@ class Handler(typing.Protocol[T]):
         """Returns if current handler has an active context"""
         ...
 
-    client: lazy.LazyPropertyDescriptor['Handler', T]
+    client: lazy.LazyPropertyDescriptor['Handler[T]', T]
+
+    @property
+    def adapter(self) -> Adapter[T]:
+        ...
 
     def open(self) -> typing.ContextManager[None]:
         """Initializes an internal client"""

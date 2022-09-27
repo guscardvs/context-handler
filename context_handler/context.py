@@ -1,4 +1,5 @@
 import contextlib
+import typing
 
 from context_handler import interfaces
 from context_handler.typedef import AsyncT
@@ -6,7 +7,7 @@ from context_handler.typedef import T
 from context_handler.utils import lazy
 
 
-class Context(interfaces.Handler[T]):
+class Context(typing.Generic[T]):
     def __init__(self, adapter: interfaces.Adapter[T]) -> None:
         self._adapter = adapter
         self._stack = 0
@@ -46,7 +47,7 @@ class Context(interfaces.Handler[T]):
         self.release()
 
 
-class AsyncContext(interfaces.AsyncHandler[AsyncT]):
+class AsyncContext(typing.Generic[AsyncT]):
     def __init__(self, adapter: interfaces.AsyncAdapter[AsyncT]) -> None:
         self._adapter = adapter
         self._stack = 0

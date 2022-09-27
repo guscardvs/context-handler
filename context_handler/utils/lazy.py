@@ -8,11 +8,19 @@ SelfT = typing.TypeVar('SelfT')
 
 _attr_name_template = '_lazyfield_{name}_'
 
-Synchronizer = typing.Callable[[], typing.ContextManager[typing.Any]]
+
+class Synchronizer(typing.Protocol):
+    def __enter__(self) -> typing.Any:
+        ...
+
+    def __exit__(self, *args) -> typing.Any:
+        ...
 
 
 class ValueShield(typing.Generic[T]):
-    def __init__(self, synchronizer: Synchronizer, value: T) -> None:
+    def __init__(
+        self, synchronizer: typing.Callable[..., Synchronizer], value: T
+    ) -> None:
         self._sync = synchronizer()
         self._value = value
 
@@ -35,7 +43,7 @@ class LazyPropertyDescriptor(typing.Generic[SelfT, T]):
     def __init__(
         self,
         func: typing.Callable[[SelfT], T],
-        synchronizer: Synchronizer,
+        synchronizer: typing.Callable[..., Synchronizer],
     ) -> None:
         self._func = func
         self._name = _attr_name_template.format(name=func.__name__)
@@ -91,7 +99,10 @@ class LazyPropertyDescriptor(typing.Generic[SelfT, T]):
 
 @typing.overload
 def lazy_property(
-    func: typing.Callable[[SelfT], T]
+    func: typing.Callable[[SelfT], T],
+    /,
+    *,
+    process_safe: bool = False,
 ) -> LazyPropertyDescriptor[SelfT, T]:
     ...
 
@@ -111,11 +122,12 @@ def lazy_property(
     *,
     process_safe: bool = False,
 ) -> typing.Callable | LazyPropertyDescriptor:
-    synchronizer: Synchronizer = (
-        multiprocessing.Lock if process_safe else threading.Lock
+    synchronizerfunc = typing.cast(
+        typing.Callable[..., Synchronizer],
+        multiprocessing.Lock if process_safe else threading.Lock,
     )
 
     def outer(func: typing.Callable) -> LazyPropertyDescriptor:
-        return LazyPropertyDescriptor(func, synchronizer)
+        return LazyPropertyDescriptor(func, synchronizerfunc)
 
     return outer if func is None else outer(func)

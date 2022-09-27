@@ -1,9 +1,8 @@
 # .coveragerc to control coverage.py
 [run]
-source = user_api
+source = context_handler
 omit=
-    **/settings.py
-    **/scripts.py
+    **/interfaces/*.py
 
 [report]
 # Regexes for lines to exclude from consideration

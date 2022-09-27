@@ -55,6 +55,13 @@ class SaAdapter(interfaces.Adapter[sa_engine.Connection]):
     def release(self, client: sa_engine.Connection) -> None:
         client.close()
 
+    def context(
+        self,
+        *,
+        transaction_on: typing.Literal['open', 'begin'] | None = 'open',
+    ) -> 'SaContext':
+        return SaContext(self, transaction_on=transaction_on)
+
 
 class SaContext(context.Context[sa_engine.Connection]):
     def __init__(
@@ -82,7 +89,7 @@ class SaContext(context.Context[sa_engine.Connection]):
     def begin(self):
         if self._transaction_on != 'begin':
             return super().begin()
-        return self._transaction_begin()
+        return self.transaction_begin()
 
     @lazy.lazy_property
     def client(self):

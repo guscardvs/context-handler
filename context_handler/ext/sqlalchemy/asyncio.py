@@ -2,7 +2,6 @@ import contextlib
 import typing
 
 import sqlalchemy.ext.asyncio as sa_asyncio
-from sqlalchemy.engine import URL
 
 from context_handler import context
 from context_handler import interfaces
@@ -10,9 +9,28 @@ from context_handler.utils import lazy
 
 
 class AsyncSaAdapter(interfaces.AsyncAdapter[sa_asyncio.AsyncConnection]):
+    @typing.overload
     def __init__(
         self,
-        uri: URL | None = None,
+        *,
+        uri: str,
+        engine: None = None,
+    ) -> None:
+        ...
+
+    @typing.overload
+    def __init__(
+        self,
+        *,
+        uri: None = None,
+        engine: sa_asyncio.AsyncEngine,
+    ) -> None:
+        ...
+
+    def __init__(
+        self,
+        *,
+        uri: str | None = None,
         engine: sa_asyncio.AsyncEngine | None = None,
     ) -> None:
         if not any((uri, engine)):
@@ -25,10 +43,10 @@ class AsyncSaAdapter(interfaces.AsyncAdapter[sa_asyncio.AsyncConnection]):
     def _engine(self):
         return sa_asyncio.create_async_engine(self._uri)
 
-    async def _create_connection(self):
+    def _create_connection(self):
         return self._engine.connect()
 
-    def is_closed(self, client: sa_asyncio.AsyncConnection) -> bool:
+    async def is_closed(self, client: sa_asyncio.AsyncConnection) -> bool:
         return client.closed
 
     async def release(self, client: sa_asyncio.AsyncConnection) -> None:
@@ -36,6 +54,12 @@ class AsyncSaAdapter(interfaces.AsyncAdapter[sa_asyncio.AsyncConnection]):
 
     async def new(self) -> sa_asyncio.AsyncConnection:
         return await self._create_connection()
+
+    def context(
+        self,
+        transaction_on: typing.Literal['open', 'begin'] | None = 'open',
+    ) -> 'AsyncSaContext':
+        return AsyncSaContext(self, transaction_on=transaction_on)
 
 
 class AsyncSaContext(context.AsyncContext[sa_asyncio.AsyncConnection]):
@@ -62,7 +86,7 @@ class AsyncSaContext(context.AsyncContext[sa_asyncio.AsyncConnection]):
     def begin(self):
         if self._transaction_on != 'begin':
             return super().begin()
-        return self._transaction_begin()
+        return self.transaction_begin()
 
     @contextlib.asynccontextmanager
     async def _transaction_open(self):
@@ -71,7 +95,7 @@ class AsyncSaContext(context.AsyncContext[sa_asyncio.AsyncConnection]):
                 yield
 
     @contextlib.asynccontextmanager
-    async def _transaction_begin(self):
+    async def transaction_begin(self):
         async with super().begin() as client:
             async with self._make_transaction(client):
                 yield client
