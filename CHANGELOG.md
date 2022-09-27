@@ -1,3 +1,17 @@
+## 5.0.0 (2022-09-27)
+
+### BREAKING CHANGE
+
+- breaks all compatibility with <5.0.0
+
+### Feat
+
+- **context_handler**: refactored all code to be more concise and less intrusive with the handlers
+
+### Refactor
+
+- refactored all files and created ext module, tests missing
+
 ## 4.0.2 (2022-02-07)
 
 ### Fix
