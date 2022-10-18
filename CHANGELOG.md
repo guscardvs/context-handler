@@ -1,3 +1,10 @@
+## 5.0.1 (2022-10-18)
+
+### Fix
+
+- fixed bugs in interface
+- **metadata**: fixed license year and build now does not uses development libs
+
 ## 5.0.0 (2022-09-27)
 
 ### BREAKING CHANGE
