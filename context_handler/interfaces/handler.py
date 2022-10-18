@@ -15,7 +15,9 @@ class Handler(typing.Protocol[T]):
         """Returns if current handler has an active context"""
         ...
 
-    client: lazy.LazyPropertyDescriptor['Handler[T]', T]
+    @lazy.lazy_property
+    def client(self) -> T:
+        ...
 
     @property
     def adapter(self) -> Adapter[T]:
@@ -32,9 +34,12 @@ class Handler(typing.Protocol[T]):
 
 
 class AsyncHandler(typing.Protocol[AsyncT]):
-    adapter: AsyncAdapter[AsyncT]
 
     def __init__(self, adapter: AsyncAdapter[AsyncT]) -> None:
+        ...
+
+    @property
+    def adapter(self) -> AsyncAdapter[AsyncT]:
         ...
 
     def is_active(self) -> bool:
