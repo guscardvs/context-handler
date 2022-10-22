@@ -17,6 +17,10 @@ class Context(typing.Generic[T]):
         return self.adapter.new()
 
     @property
+    def stack(self):
+        return self._stack
+
+    @property
     def adapter(self) -> interfaces.Adapter[T]:
         return self._adapter
 
@@ -38,13 +42,17 @@ class Context(typing.Generic[T]):
     @contextlib.contextmanager
     def open(self):
         self.acquire()
-        yield
-        self.release()
+        try:
+            yield
+        finally:
+            self.release()
 
     @contextlib.contextmanager
     def begin(self):
-        yield self.acquire()
-        self.release()
+        try:
+            yield self.acquire()
+        finally:
+            self.release()
 
 
 class AsyncContext(typing.Generic[AsyncT]):
@@ -52,6 +60,11 @@ class AsyncContext(typing.Generic[AsyncT]):
         self._adapter = adapter
         self._stack = 0
         self._client: AsyncT | None = None
+
+    @property
+    def stack(self) -> int:
+        """Returns how many frames are using this context"""
+        return self._stack
 
     @property
     def adapter(self) -> interfaces.AsyncAdapter[AsyncT]:
@@ -83,10 +96,14 @@ class AsyncContext(typing.Generic[AsyncT]):
     @contextlib.asynccontextmanager
     async def open(self):
         await self.acquire()
-        yield
-        await self.release()
+        try:
+            yield
+        finally:
+            await self.release()
 
     @contextlib.asynccontextmanager
     async def begin(self):
-        yield await self.acquire()
-        await self.release()
+        try:
+            yield await self.acquire()
+        finally:
+            await self.release()

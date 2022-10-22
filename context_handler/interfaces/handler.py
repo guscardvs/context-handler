@@ -34,7 +34,6 @@ class Handler(typing.Protocol[T]):
 
 
 class AsyncHandler(typing.Protocol[AsyncT]):
-
     def __init__(self, adapter: AsyncAdapter[AsyncT]) -> None:
         ...
 

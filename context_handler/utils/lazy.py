@@ -3,6 +3,9 @@ import multiprocessing
 import threading
 import typing
 
+from .helpers import no_cover
+
+
 T = typing.TypeVar('T')
 SelfT = typing.TypeVar('SelfT')
 
@@ -10,9 +13,11 @@ _attr_name_template = '_lazyfield_{name}_'
 
 
 class Synchronizer(typing.Protocol):
+    @no_cover
     def __enter__(self) -> typing.Any:
         ...
 
+    @no_cover
     def __exit__(self, *args) -> typing.Any:
         ...
 
