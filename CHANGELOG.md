@@ -1,3 +1,9 @@
+## 5.0.2 (2022-10-22)
+
+### Fix
+
+- **context**: fixed bug where context was not released if exception occurred
+
 ## 5.0.1 (2022-10-18)
 
 ### Fix
