@@ -59,7 +59,7 @@ class AsyncContext(typing.Generic[AsyncT]):
     def __init__(self, adapter: interfaces.AsyncAdapter[AsyncT]) -> None:
         self._adapter = adapter
         self._stack = 0
-        self._client: AsyncT | None = None
+        self._client: typing.Optional[AsyncT] = None
 
     @property
     def stack(self) -> int:

@@ -9,6 +9,8 @@ from context_handler import context
 from context_handler import interfaces
 from context_handler.utils import lazy
 
+TransactionOption = typing.Optional[typing.Literal['open', 'begin']]
+
 
 class SaAdapter(interfaces.Adapter[sa_engine.Connection]):
     @typing.overload
@@ -32,8 +34,8 @@ class SaAdapter(interfaces.Adapter[sa_engine.Connection]):
     def __init__(
         self,
         *,
-        uri: str | None = None,
-        engine: sa_engine.Engine | None = None,
+        uri: typing.Optional[str] = None,
+        engine: typing.Optional[sa_engine.Engine] = None,
     ) -> None:
         if not any((uri, engine)):
             raise TypeError('Missing parameters (uri/engine)')
@@ -58,7 +60,7 @@ class SaAdapter(interfaces.Adapter[sa_engine.Connection]):
     def context(
         self,
         *,
-        transaction_on: typing.Literal['open', 'begin'] | None = 'open',
+        transaction_on: TransactionOption = 'open',
     ) -> 'SaContext':
         return SaContext(self, transaction_on=transaction_on)
 
@@ -67,7 +69,7 @@ class SaContext(context.Context[sa_engine.Connection]):
     def __init__(
         self,
         adapter: interfaces.Adapter[sa_engine.Connection],
-        transaction_on: typing.Literal['open', 'begin'] | None = 'open',
+        transaction_on: TransactionOption = 'open',
     ) -> None:
         super().__init__(adapter)
         self._transaction_on = transaction_on

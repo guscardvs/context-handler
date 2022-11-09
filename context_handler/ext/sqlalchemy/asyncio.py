@@ -1,4 +1,5 @@
 import contextlib
+import sys
 import typing
 
 import sqlalchemy.ext.asyncio as sa_asyncio
@@ -6,6 +7,8 @@ import sqlalchemy.ext.asyncio as sa_asyncio
 from context_handler import context
 from context_handler import interfaces
 from context_handler.utils import lazy
+
+TransactionOptions = typing.Optional[typing.Literal['open', 'begin']]
 
 
 class AsyncSaAdapter(interfaces.AsyncAdapter[sa_asyncio.AsyncConnection]):
@@ -30,8 +33,8 @@ class AsyncSaAdapter(interfaces.AsyncAdapter[sa_asyncio.AsyncConnection]):
     def __init__(
         self,
         *,
-        uri: str | None = None,
-        engine: sa_asyncio.AsyncEngine | None = None,
+        uri: typing.Optional[str] = None,
+        engine: typing.Optional[sa_asyncio.AsyncEngine] = None,
     ) -> None:
         if not any((uri, engine)):
             raise TypeError('Missing parameters (uri/engine)')
@@ -57,23 +60,36 @@ class AsyncSaAdapter(interfaces.AsyncAdapter[sa_asyncio.AsyncConnection]):
 
     def context(
         self,
-        transaction_on: typing.Literal['open', 'begin'] | None = 'open',
+        transaction_on: TransactionOptions = 'open',
     ) -> 'AsyncSaContext':
         return AsyncSaContext(self, transaction_on=transaction_on)
+
+
+if sys.version_info < (3, 10):
+
+    class asyncnullcontext(contextlib.nullcontext):
+        async def __aenter__(self):
+            return self.enter_result
+
+        async def __aexit__(self, *excinfo):
+            pass
+
+else:
+    asyncnullcontext = contextlib.nullcontext
 
 
 class AsyncSaContext(context.AsyncContext[sa_asyncio.AsyncConnection]):
     def __init__(
         self,
         adapter: interfaces.AsyncAdapter[sa_asyncio.AsyncConnection],
-        transaction_on: typing.Literal['open', 'begin'] | None = 'open',
+        transaction_on: TransactionOptions = 'open',
     ) -> None:
         super().__init__(adapter)
         self._transaction_on = transaction_on
 
     def _make_transaction(self, connection: sa_asyncio.AsyncConnection):
         if self._transaction_on is None:
-            return contextlib.nullcontext()
+            return asyncnullcontext()
         if connection.in_transaction():
             return connection.begin_nested()
         return connection.begin()

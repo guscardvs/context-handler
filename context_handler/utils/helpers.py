@@ -2,7 +2,9 @@ import typing
 import warnings
 from functools import wraps
 
-P = typing.ParamSpec('P')
+from typing_extensions import ParamSpec
+
+P = ParamSpec('P')
 T = typing.TypeVar('T')
 
 

@@ -5,7 +5,6 @@ import typing
 
 from .helpers import no_cover
 
-
 T = typing.TypeVar('T')
 SelfT = typing.TypeVar('SelfT')
 
@@ -55,7 +54,9 @@ class LazyPropertyDescriptor(typing.Generic[SelfT, T]):
         self._synchronizer = synchronizer
 
     def __get__(
-        self, instance: SelfT | None, owner: type[SelfT] | None = None
+        self,
+        instance: typing.Optional[SelfT],
+        owner: typing.Optional[type[SelfT]] = None,
     ):
         if instance is None:
             assert owner is not None
@@ -122,11 +123,11 @@ def lazy_property(
 
 
 def lazy_property(
-    func: typing.Callable | None = None,
+    func: typing.Optional[typing.Callable] = None,
     /,
     *,
     process_safe: bool = False,
-) -> typing.Callable | LazyPropertyDescriptor:
+) -> typing.Union[typing.Callable, LazyPropertyDescriptor]:
     synchronizerfunc = typing.cast(
         typing.Callable[..., Synchronizer],
         multiprocessing.Lock if process_safe else threading.Lock,
