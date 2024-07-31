@@ -1,25 +1,30 @@
 import typing
 
-from context_handler import context
-from context_handler import interfaces
-from context_handler.typedef import AsyncT
-from context_handler.typedef import T
-from context_handler.utils import lazy
+from lazyfields import lazyfield
+
+from context_handler import context, interfaces
+from context_handler.typedef import AsyncT, T
 
 
 class _FactoryWrapper(typing.Generic[T]):
     def __init__(self, adapter: interfaces.Adapter[T]) -> None:
         self._adapter = adapter
 
-    def __call__(self) -> interfaces.Handler[T]:
+    def __call__(self) -> context.Context[T]:
         return self.context
 
     def get(self):
         return context.Context(self._adapter)
 
-    @lazy.lazy_property
+    @lazyfield
     def context(self):
         return self.get()
+
+    def __enter__(self):
+        return self.context.__enter__()
+
+    def __exit__(self, *exc):
+        return self.context.__exit__(*exc)
 
     def begin(self):
         return self.context.begin()
@@ -35,15 +40,21 @@ class _AsyncFactoryWrapper(typing.Generic[AsyncT]):
     def __init__(self, adapter: interfaces.AsyncAdapter[AsyncT]) -> None:
         self._adapter = adapter
 
-    def __call__(self) -> interfaces.AsyncHandler[AsyncT]:
+    def __call__(self) -> context.AsyncContext[AsyncT]:
         return self.context
 
     def get(self):
         return context.AsyncContext(self._adapter)
 
-    @lazy.lazy_property
+    @lazyfield
     def context(self):
         return self.get()
+
+    async def __aenter__(self):
+        return await self.context.__aenter__()
+
+    async def __aexit__(self, *exc):
+        return await self.context.__aexit__(*exc)
 
     def begin(self):
         return self.context.begin()

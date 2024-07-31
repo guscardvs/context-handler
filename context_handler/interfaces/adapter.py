@@ -1,7 +1,6 @@
 import typing
 
-from context_handler.typedef import AsyncT
-from context_handler.typedef import T
+from context_handler.typedef import AsyncT, T
 
 
 class Adapter(typing.Protocol[T]):

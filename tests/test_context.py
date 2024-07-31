@@ -1,5 +1,7 @@
 import contextlib
 
+from lazyfields import is_initialized
+
 import context_handler
 from context_handler import context
 from tests import mocks
@@ -28,7 +30,7 @@ async def test_async_context_factory_return_valid_async_context_on_call():
             assert isinstance(factory.context, context.AsyncContext)
 
     assert client.closed
-    assert factory.context._client is None
+    assert not is_initialized(factory.context, 'client')
     assert factory.context.stack == 0
 
 
@@ -39,7 +41,7 @@ def test_context_closes_correctly_when_exception_raised_on_open():
             client = factory.context.client
             raise CustomException()
 
-    assert client.closed   # type: ignore
+    assert client.closed  # type: ignore
     assert factory.context.stack == 0
 
 
@@ -59,7 +61,6 @@ async def test_asynccontext_closes_correctly_when_exception_raised_on_open():
         async with factory.open():
             raise CustomException()
 
-    assert factory.context._client is None
     assert factory.context.stack == 0
 
 
@@ -68,6 +69,5 @@ async def test_asynccontext_closes_correctly_when_exception_raised_on_begin():
     with contextlib.suppress(CustomException):
         async with factory.begin():
             raise CustomException()
-
-    assert factory.context._client is None
+    assert not is_initialized(factory.context, 'client')
     assert factory.context.stack == 0

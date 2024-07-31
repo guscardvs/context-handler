@@ -1,18 +1,21 @@
+import asyncio
 import contextlib
+import threading
 import typing
 
+from lazyfields import asynclazyfield, dellazy, is_initialized, lazyfield
+
 from context_handler import interfaces
-from context_handler.typedef import AsyncT
-from context_handler.typedef import T
-from context_handler.utils import lazy
+from context_handler.typedef import AsyncT, T
 
 
 class Context(typing.Generic[T]):
     def __init__(self, adapter: interfaces.Adapter[T]) -> None:
         self._adapter = adapter
         self._stack = 0
+        self._lock = threading.Lock()
 
-    @lazy.lazy_property
+    @lazyfield
     def client(self) -> T:
         return self.adapter.new()
 
@@ -28,38 +31,43 @@ class Context(typing.Generic[T]):
         return self._stack > 0
 
     def acquire(self):
-        if self.adapter.is_closed(self.client):
-            del self.client
-        self._stack += 1
-        return self.client
+        with self._lock:
+            if is_initialized(self, 'client') and self.adapter.is_closed(
+                self.client
+            ):
+                dellazy(self, 'client')
+            self._stack += 1
+            return self.client
 
     def release(self):
-        if self._stack == 1:
-            self.adapter.release(self.client)
-            del self.client
-        self._stack -= 1
+        with self._lock:
+            if self._stack == 1:
+                self.adapter.release(self.client)
+                dellazy(self, 'client')
+            self._stack -= 1
+
+    def __enter__(self) -> T:
+        return self.acquire()
+
+    def __exit__(self, *_) -> None:
+        return self.release()
 
     @contextlib.contextmanager
-    def open(self):
-        self.acquire()
-        try:
+    def open(self) -> typing.Generator[None, None, None]:
+        with self:
             yield
-        finally:
-            self.release()
 
     @contextlib.contextmanager
-    def begin(self):
-        try:
-            yield self.acquire()
-        finally:
-            self.release()
+    def begin(self) -> typing.Generator[T, None, None]:
+        with self as client:
+            yield client
 
 
 class AsyncContext(typing.Generic[AsyncT]):
     def __init__(self, adapter: interfaces.AsyncAdapter[AsyncT]) -> None:
         self._adapter = adapter
         self._stack = 0
-        self._client: typing.Optional[AsyncT] = None
+        self._lock = asyncio.Lock()
 
     @property
     def stack(self) -> int:
@@ -73,37 +81,36 @@ class AsyncContext(typing.Generic[AsyncT]):
     def is_active(self) -> bool:
         return self._stack > 0
 
+    @asynclazyfield
     async def client(self) -> AsyncT:
-        if self._client is None or await self._adapter.is_closed(self._client):
-            self._client = await self._adapter.new()
-        return self._client
+        return await self.adapter.new()
 
     async def acquire(self):
-        client = await self.client()
-        self._stack += 1
-        return client
+        async with self._lock:
+            client = await self.client()
+            self._stack += 1
+            return client
 
     async def release(self):
-        if self._client is None:
-            raise RuntimeError(
-                'Release should not be called before client initialization'
-            )
-        if self._stack == 1:
-            await self.adapter.release(self._client)
-            self._client = None
-        self._stack -= 1
+        async with self._lock:
+            if self._stack == 1:
+                client = await self.client()
+                await self.adapter.release(client)
+                dellazy(self, 'client')
+            self._stack -= 1
+
+    async def __aenter__(self) -> AsyncT:
+        return await self.acquire()
+
+    async def __aexit__(self, *_) -> None:
+        await self.release()
 
     @contextlib.asynccontextmanager
-    async def open(self):
-        await self.acquire()
-        try:
+    async def open(self) -> typing.AsyncGenerator[None, None]:
+        async with self:
             yield
-        finally:
-            await self.release()
 
     @contextlib.asynccontextmanager
-    async def begin(self):
-        try:
-            yield await self.acquire()
-        finally:
-            await self.release()
+    async def begin(self) -> typing.AsyncGenerator[AsyncT, None]:
+        async with self as client:
+            yield client

@@ -1,11 +1,6 @@
-from .adapter import Adapter
-from .adapter import AsyncAdapter
-from .handler import AsyncHandler
-from .handler import Handler
+from .adapter import Adapter, AsyncAdapter
 
 __all__ = [
     'Adapter',
     'AsyncAdapter',
-    'AsyncHandler',
-    'Handler',
 ]
